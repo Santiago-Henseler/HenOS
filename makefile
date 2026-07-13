@@ -23,7 +23,7 @@ kernel.bin:
 	gcc $(CFLAGS) $(LIBS) -c $(KERNELFILES)
 	ld -m elf_i386 -T link.ld *.o -o kernel.elf
 	objcopy -O binary kernel.elf kernel.bin
-	
+
 bootdisk:
 	dd if=/dev/zero of=disk.img bs=512 count=2880 # Comentar esta linea para mantener el filesystem
 	dd conv=notrunc if=bootloader of=disk.img bs=512 count=1 seek=0

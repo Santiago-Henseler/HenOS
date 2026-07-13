@@ -44,14 +44,14 @@ pageTableEntry * newPageTable(){
 }  
 
 void mapPage(void *pa, void *va, uint32 flags){
-    //TODO: agregar mejore chequeos
+    //TODO: agregar mejores chequeos
     uint32 pageDirPos = ((uint32)va & VA_TO_PD_MASK) >> 22;
     uint32 pageTablePos = ((uint32)va & VA_TO_PT_MASK) >> 12;
 
     if (!(pageDirectory[pageDirPos] & PAGE_FLAG_PRESENT)) {
         pageTableEntry *newP = newPageTable();
         pageDirectory[pageDirPos] = ((uint32)newP & PDE_TO_PT_MASK) | PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE;
-        mapPage(newP, newP,PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE );
+        mapPage(newP, newP, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE );
     }
 
     pageTableEntry *pageTable = (pageTableEntry *)(pageDirectory[pageDirPos] & PDE_TO_PT_MASK);
