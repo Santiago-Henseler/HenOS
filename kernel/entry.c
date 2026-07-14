@@ -31,5 +31,16 @@ void main(uint32 memRamSize){
   printf("[info] Se inicio la memoria paginada\n");  
   printf("[info] Se inicio el driver del floppy disk\n");  
 
+  uint8 buffer[FLOPPY_BLOCK_SIZE];
+  int err = readFloppyDisk(52, buffer);
+
+  mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) 0x280000), PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE);
+  memCopy(buffer, ((char*) 0x280000), 80);
+
+  
+  
+
+  runProcess(((char*) 0x280000));
+
   for (;;);
 }

@@ -76,4 +76,6 @@ void initPageTable();
 // Devuelve un puntero a una direccion de memoria virtual paginada
 void * getPage();
 
+void mapPage(void *pa, void *va, uint32 flags);
+
 #endif

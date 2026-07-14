@@ -20,10 +20,10 @@ void initPageTable(uint32 freeMemSize){
     }
 
     uint32 blocks = freeMemSize / PAGE_SIZE;
-    for (uint32 addr = 0; addr < ALIGN(((uint32)&kernelEnd + blocks*sizeof(memBlock)), PAGE_SIZE); addr += PAGE_SIZE) {
-        mapPage((void*)addr, (void*)addr, PAGE_FLAG_KERNEL  | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT);
+    for (uint32 addr = 0; addr < ALIGN(((uint32)&kernelEnd  + blocks*sizeof(memBlock)), PAGE_SIZE); addr += PAGE_SIZE) {
+        mapPage((void*)addr, (void*)addr, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT);
     }
-
+    
     mapPage(MEM_VGA, MEM_VGA, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT);
 
     mapPage(pageDirectory, pageDirectory, PAGE_FLAG_WRITE  | PAGE_FLAG_PRESENT| PAGE_FLAG_KERNEL);

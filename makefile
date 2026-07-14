@@ -2,7 +2,7 @@ CFLAGS = -masm=intel -m32 -ffreestanding -nostdlib -nostdinc -fno-stack-protecto
 LIBS = -Ilib -Ikernel/drivers  -Ikernel/memory -Ikernel/interrupts -Ikernel/syscall -Ikernel/fileSystem
 KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c lib/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c
 
-all: clean bootloader asm kernel.bin bootdisk run
+all: clean bootloader asm kernel.bin bootdisk
 debug: clean bootloader asm kernel.bin bootdisk gdb
 
 clean: 
@@ -29,8 +29,7 @@ bootdisk:
 	dd if=/dev/zero of=disk.img bs=512 count=2880 # Comentar esta linea para mantener el filesystem
 	dd conv=notrunc if=bootloader of=disk.img bs=512 count=1 seek=0
 	dd if=kernel.bin of=disk.img bs=512 conv=notrunc seek=1
-	dd if=a.o of=disk.img bs=512 conv=notrunc seek=52
-
+	
 run:
 	qemu-system-i386 -machine q35 -m 512M -fda disk.img
 
@@ -42,3 +41,10 @@ gdb:
 	  -ex "file kernel.elf" \
 	  -ex "target remote localhost:26000" \
 	  -ex "layout split"
+
+program:
+	gcc $(CFLAGS) -c program.c
+	ld -m elf_i386 -T program.ld program.o --just-symbols=kernel.elf -o programa.elf
+	objcopy -O binary -j .text programa.elf programa.bin
+	rm program.o program.elf
+	dd if=programa.bin of=disk.img bs=512 conv=notrunc seek=52
