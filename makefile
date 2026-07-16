@@ -44,7 +44,7 @@ gdb:
 
 program:
 	gcc $(CFLAGS) -c program.c
-	ld -m elf_i386 -T program.ld program.o --just-symbols=kernel.elf -o programa.elf
-	objcopy -O binary -j .text programa.elf programa.bin
+	ld -m elf_i386 -T program.ld program.o --just-symbols=kernel.elf -o program.elf
+	objcopy -O binary -j .text program.elf program.bin
 	rm program.o program.elf
-	dd if=programa.bin of=disk.img bs=512 conv=notrunc seek=52
+	dd if=program.bin of=disk.img bs=512 conv=notrunc seek=52

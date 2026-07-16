@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <idt.h>
 #include <pic.h>
+#include "../process/process.h"    
 #include "../drivers/floppyDisk/floppy.h"
 
 typedef struct {

@@ -78,4 +78,6 @@ void * getPage();
 
 void mapPage(void *pa, void *va, uint32 flags);
 
+void freePage(void * va);
+
 #endif
