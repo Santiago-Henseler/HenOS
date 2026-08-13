@@ -1,20 +1,17 @@
 #include "string.h"
 
 int32 strLen(const char *str){
-
     if(str == NULL)
         return -1;
 
     int len = 0;    
     while (*str){
-        len++;
-        str++;
+        len++; str++;
     }
     return len;
 }
 
 int strReverse(char *str){
-
     if(str == NULL)
         return -1;
 
@@ -28,7 +25,6 @@ int strReverse(char *str){
 }
 
 int strCopy(char * src, char * dst){   
-
     if(src == NULL || dst == NULL)
         return -1;
 
@@ -38,6 +34,9 @@ int strCopy(char * src, char * dst){
 }
 
 bool strCompare(const char *first, const char *second){
+    if(first == NULL || second == NULL)
+        return false;
+
     while (*first && *second) {
         if (*first != *second)
             return false;
@@ -66,13 +65,49 @@ int strConcat(char * src, char ** dst){
 }
 
 bool strContains(char * str, char c){
-    bool contains = false;
+    if(str == NULL)
+        return false;
 
-    while(*str && !contains){
+    int index = strIndexOf(str, c);
+
+    return  index == -1 ? false : true;
+}
+
+int strIndexOf(char * str, char c){
+    int index = -1;
+
+    int i = 0;
+    while(*str && index != -1){
         if(*str == c)
-            contains = true;
-        str++;
+            index = i;
+        str++; i++;
     }
 
-    return contains;
+    return index;
+}
+
+char * strCutAt(char ** str, char c){
+
+    if(str == NULL)
+        return "";
+
+    char * string = *str;
+    bool cut = false;
+
+    char * firstHalf = (char *)malloc(strLen(string) + 1);
+    char *result = firstHalf;
+
+    while (*string && !cut){
+        if(*string == c){
+          cut = true;
+          *str = string;
+          *firstHalf = '\0';
+        }else{
+          *firstHalf = *string;
+          firstHalf++;
+        }
+        string++;
+    }
+
+    return result;
 }

@@ -13,16 +13,22 @@ int32 strLen(const char *str);
 // Dado un str lo invierte
 int strReverse(char *str);
 
-// Copia el str de src a dst
+// Copia el char* de src a dst
 int strCopy(char * src, char * dst);
 
-// Devuelve true si ambos str son iguales
+// Devuelve true si ambos char* son iguales
 bool strCompare(const char *first, const char *second);
 
 // Concatena src al final de dst
 int strConcat(char * src, char ** dst);
 
-// Devuelve true si str contiene el caracter entre comillas simples
+// Devuelve true si el char* contiene el caracter
 bool strContains(char * str, char c);
+
+// Devuelve el indice de la primera aparicion del caracter 
+int strIndexOf(char * str, char c);
+
+// Devuelve un char * con los char hasta la primera aparicion del caracter y en str devuelve el resto
+char * strCutAt(char ** str, char c);
 
 #endif

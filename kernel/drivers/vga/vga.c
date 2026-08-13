@@ -11,17 +11,22 @@ void moverCursor(int pos){
         pos = pos % (VGA_HEIGHT*VGA_WIDTH);
 
     // Seteo para enviar parte alta de pos y lo envio
-    outB(COMMAND_PORT_VGA, 14); 
-    outB(DATA_PORT_VGA, ((pos >> 8) & 0x00FF));
+    outB(COMMAND_PORT_VGA, 0xF); 
+    outB(DATA_PORT_VGA, ((pos >> 8) & 0xFF));
     // Seteo para enviar parte baja de pos y lo envio
-    outB(COMMAND_PORT_VGA, 15);
-    outB(DATA_PORT_VGA, pos & 0x00FF);
+    outB(COMMAND_PORT_VGA, 0xE);
+    outB(DATA_PORT_VGA, pos & 0xFF);
+
+    // Dibujo un '_' para indicar donde esta el cursor
+    volatile char * videoMem = MEM_VGA + 2*(cursorX + VGA_WIDTH*cursorY);
+    videoMem[0] = '_';
+    videoMem[1] =  WHITE + BLUE_BG;
 }
 
 void caracterVacio(int color){
     volatile char * videoMem = MEM_VGA + 2*(cursorX + VGA_WIDTH*cursorY);
     videoMem[0] = ' ';
-    videoMem[1] = color;
+    videoMem[1] = BLUE_BG;
     cursorX++;
 }
 
@@ -55,7 +60,7 @@ void clearVga(){
         for(int x = 0; x < VGA_WIDTH; x++){
             volatile char * videoMem = MEM_VGA + 2*x + 160*y;
             videoMem[0] = ' ';
-            videoMem[1] = WHITE;
+            videoMem[1] = BLUE_BG;
         }
     }
     
@@ -84,7 +89,7 @@ void printVga(const char* str, int color){
         volatile char * videoMem = MEM_VGA + 2*(cursorX + VGA_WIDTH*cursorY);
 
         videoMem[0] = *str++;
-        videoMem[1] = color; 
+        videoMem[1] = color + BLUE_BG; 
 
         cursorX++;
         if(cursorX == VGA_WIDTH){

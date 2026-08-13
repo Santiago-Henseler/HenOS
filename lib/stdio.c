@@ -51,9 +51,15 @@ int printf(char* str, ...){
                     strConcat(h, &txt);
                     free(h);
                     break;
-                case 'b':
+                case 'f':
                     int boolean =  va_arg(args, int);
                     strConcat(boolean ? "True" : "False", &txt);
+                    break;
+                case 'b':
+                    // TODO
+                    break;
+                case 'v':
+                    // TODO
                     break;
                 default:
                     char formatD[3] = {'%',*str, '\0'};
@@ -61,7 +67,6 @@ int printf(char* str, ...){
                     break;
             }
         }else{
-            //TODO: obtener caracter hasta la aparicion de un %
             char format[2] = {*str, '\0'};
             strConcat(format, &txt);
         }
