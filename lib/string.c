@@ -64,6 +64,19 @@ int strConcat(char * src, char ** dst){
     return 0;
 }
 
+int strIndexOf(char * str, char c){
+    int index = -1;
+
+    int i = 0;
+    while(*str && index == -1){
+        if(*str == c)
+            index = i;
+        str++; i++;
+    }
+
+    return index;
+}
+
 bool strContains(char * str, char c){
     if(str == NULL)
         return false;
@@ -73,21 +86,7 @@ bool strContains(char * str, char c){
     return  index == -1 ? false : true;
 }
 
-int strIndexOf(char * str, char c){
-    int index = -1;
-
-    int i = 0;
-    while(*str && index != -1){
-        if(*str == c)
-            index = i;
-        str++; i++;
-    }
-
-    return index;
-}
-
 char * strCutAt(char ** str, char c){
-
     if(str == NULL)
         return "";
 
@@ -100,14 +99,15 @@ char * strCutAt(char ** str, char c){
     while (*string && !cut){
         if(*string == c){
           cut = true;
-          *str = string;
-          *firstHalf = '\0';
         }else{
           *firstHalf = *string;
           firstHalf++;
+          string++;
         }
-        string++;
     }
+
+    *firstHalf = '\0';
+    *str = string;
 
     return result;
 }

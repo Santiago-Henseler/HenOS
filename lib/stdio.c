@@ -19,7 +19,7 @@ int printf(char* str, ...){
 
     char * txt = malloc(1);
     txt[0] = '\0';
-    
+
     while (*str){
         if(*str == '%'){
             str++;
@@ -51,26 +51,21 @@ int printf(char* str, ...){
                     strConcat(h, &txt);
                     free(h);
                     break;
-                case 'f':
+                case 'b':
                     int boolean =  va_arg(args, int);
                     strConcat(boolean ? "True" : "False", &txt);
                     break;
-                case 'b':
-                    // TODO
-                    break;
-                case 'v':
-                    // TODO
-                    break;
                 default:
-                    char formatD[3] = {'%',*str, '\0'};
+                    char formatD[3] = {'%',*str,'\0'};
                     strConcat(formatD, &txt);
                     break;
             }
+            str++;
         }else{
-            char format[2] = {*str, '\0'};
+            char * format = strCutAt(&str, '%');
             strConcat(format, &txt);
+            free(format);
         }
-        str++;
     }
 
     printVga(txt, WHITE);
