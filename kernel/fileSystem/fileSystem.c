@@ -4,7 +4,7 @@ typedef struct superBlock{
     uint32 code; 
     uint32 inodes; // Canitdad de inodes
     uint32 root;
-    uint8 bitMap[FS_BITMAP_SIZE]; // 0 => bloque libre
+    uint8 bitMap[FS_BITMAP_SIZE]; // 0 indica un bloque libre
 } superBlock;
 
 typedef struct dentry{
@@ -14,7 +14,7 @@ typedef struct dentry{
 
 typedef struct inode{
     fileType type;
-    uint16 size;
+    uint16 size; // Total en bytes
     uint16 block[FILE_MAX_BLOCKS];
 } inode;
 
@@ -62,16 +62,20 @@ int findBlockInodeInCWD(char * fileName){
 
     int i = 0;
     bool found = false;    
-    while(!found && i < FILE_MAX_BLOCKS){
-        if (root->block[i] < SUPER_BLOCK_POS)
-            found = true; // no lo encontre pero ya no hay mas bloques validos 
-
+    while(!found && i < MAX_DENTRY_PER_BLOCK && ((int)(root->size / sizeof(dentry)) - (i * MAX_DENTRY_PER_BLOCK)) > 0){
         uint8 buffer[FLOPPY_BLOCK_SIZE];
         int err = readFloppyDisk(root->block[i], buffer);
         if(err == -1) return -1;
+        
+        // El total de dentrys a que tiene este bloque
+        int remainDentrys = (root->size/sizeof(dentry)) - i*MAX_DENTRY_PER_BLOCK;
+        int actualDentrys = MAX_DENTRY_PER_BLOCK;
+        if(remainDentrys > 0 && remainDentrys < MAX_DENTRY_PER_BLOCK){
+            actualDentrys = remainDentrys;
+        }
 
         dentry *entries = (dentry *)buffer;
-        for(int j = 0; j <= root->size % sizeof(dentry) && !found; j++){
+        for(int j = 0; j < actualDentrys && !found; j++){ 
             dentry entrie = entries[j];
             if(strCompare(entrie.name, fileName)){
                 inode = entrie.inode;
@@ -85,7 +89,7 @@ int findBlockInodeInCWD(char * fileName){
 
 // Devuelve devuelve el puntero del inodo con nombre filename dentro del Current Work Directory
 // Si no lo encuentra retorna NULL
-int findInodeInCWD(char * fileName){
+inode * findInodeInCWD(char * fileName){
     int inodeBlockNum = findBlockInodeInCWD(fileName);
     if(inodeBlockNum == -1) return NULL;
 

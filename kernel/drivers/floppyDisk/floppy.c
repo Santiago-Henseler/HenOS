@@ -136,8 +136,10 @@ void initFloppyDisk(){
     sendFloppyCommand(FLOPPY_VERSION_COMMAND);
     uint8 version = reciveFloppyCommand();
 
-    if(version != 0x90)
-        for(;;); //TODO: No hay soporte para esta unidad floppy
+    if(version != 0x90){
+        printVga("No hay soporte para esa version de floppy disk", RED);
+        for(;;);
+    }
     // Configuro el floppy disk
     sendFloppyCommand(FLOPPY_CONFIGURE_COMMAND);
     sendFloppyCommand(0x68);   // Busqueda implicita habilitada              

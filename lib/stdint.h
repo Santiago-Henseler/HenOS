@@ -22,13 +22,16 @@ typedef unsigned long long uint64;
 // Alinea a la base
 #define ALIGN(addr, align) (((int)(addr) + ((align) - 1)) & ~((align) - 1))
 
-// Dado un int devuelve un string terminado en \0 (considerando el signo)
+// Dado un int devuelve un string terminado (considerando el signo)
 char * intToStr(int num);
 
-// Dado un int devuelve un string terminado en \0
+// Dado un int devuelve un string terminado
 char * uIntToStr(int num);
 
-// Dado un int(en hexa) devuelve un string terminado en \0 e iniciado en 0x
+// Dado un int(en hexa) devuelve un string terminado e iniciado en 0x
 char * hexToStr(int num);
+
+// Dado un int lo devuelve en binario en un string
+char * uIntToBin(int i);
 
 #endif

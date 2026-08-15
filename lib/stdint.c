@@ -73,3 +73,26 @@ char * hexToStr(int num){
 
     return str;
 }
+
+char * uIntToBin(int i){
+    char tmp[32];
+
+    int index = -1;
+
+    for(int j = 0; j < 32; j++){
+        if(index == -1 && i % 2 == 1)
+            index = 31 - j; 
+
+        tmp[31-j] = (i % 2 == 0 ? '0' : '1');
+        i /= 2;
+    }    
+    
+    char * bin = (char *) malloc(sizeof(char) * (33 - index));
+    bin[32-index] = '\0';
+
+    for(int j = 0; j < 32-index; j++){
+        bin[j] = tmp[index+j];
+    }
+
+    return bin;
+}

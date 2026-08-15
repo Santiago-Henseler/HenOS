@@ -25,6 +25,8 @@
 #define FILE_MAX_BLOCKS 50
 #define FILE_MAX_SIZE FILE_MAX_BLOCKS * FLOPPY_BLOCK_SIZE
 
+#define MAX_DENTRY_PER_BLOCK 16
+
 typedef enum fileType{
     DIR,
     EXEC,
@@ -37,8 +39,11 @@ void initFileSystem();
 // Crea un archivo en el directorio actual
 int createFile(fileType type, char * fileName);
 
+// Escribe size bytes en un archivo existente
 int writeFile(char * fileName, uint8 * data, uint32 size);
 
 void * readFile(char * fileName);
+
+
 
 #endif

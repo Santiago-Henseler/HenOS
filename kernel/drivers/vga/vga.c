@@ -43,7 +43,7 @@ void scrollUpVga(){
 }
 
 void newLineVga(){
-
+    // TODO: BORRAR EL CURSOR
     if(cursorY < VGA_HEIGHT-1){
         cursorY++;
         cursorX = 0;
