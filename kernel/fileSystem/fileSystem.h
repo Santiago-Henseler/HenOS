@@ -14,9 +14,6 @@
 // Tamaño del bitmap para poder saber que bloques estan libres
 #define FS_BITMAP_SIZE 352 // (FLOPPY_MAX_BLOCK - SUPER_BLOCK_POS - 6 / 8) - 1 (resto 6 y 1 para que sea multiplo de 8)
 
-// Cantidad de dentrys que entran en un bloque
-#define FS_DENTRY_BLOCK FLOPPY_BLOCK_SIZE/sizeof(dentry) 
-
 // Codigo para indicar que el fileSystem esta creado
 #define FS_CODE 270425
 
@@ -43,7 +40,5 @@ int createFile(fileType type, char * fileName);
 int writeFile(char * fileName, uint8 * data, uint32 size);
 
 void * readFile(char * fileName);
-
-
 
 #endif

@@ -3,7 +3,7 @@
 typedef struct superBlock{
     uint32 code; 
     uint32 inodes; // Canitdad de inodes
-    uint32 root;
+    uint32 cwd;
     uint8 bitMap[FS_BITMAP_SIZE]; // 0 indica un bloque libre
 } superBlock;
 
@@ -21,7 +21,8 @@ typedef struct inode{
 static superBlock sb;
 superBlock *sBlock = &sb;
 
-inode *root;
+inode *cwd;
+int cwdBlock;
 
 int getFreeBlock(){
     int freeBlock = -1;
@@ -62,13 +63,13 @@ int findBlockInodeInCWD(char * fileName){
 
     int i = 0;
     bool found = false;    
-    while(!found && i < MAX_DENTRY_PER_BLOCK && ((int)(root->size / sizeof(dentry)) - (i * MAX_DENTRY_PER_BLOCK)) > 0){
+    while(!found && i < MAX_DENTRY_PER_BLOCK && ((int)(cwd->size / sizeof(dentry)) - (i * MAX_DENTRY_PER_BLOCK)) > 0){
         uint8 buffer[FLOPPY_BLOCK_SIZE];
-        int err = readFloppyDisk(root->block[i], buffer);
+        int err = readFloppyDisk(cwd->block[i], buffer);
         if(err == -1) return -1;
         
         // El total de dentrys a que tiene este bloque
-        int remainDentrys = (root->size/sizeof(dentry)) - i*MAX_DENTRY_PER_BLOCK;
+        int remainDentrys = (cwd->size/sizeof(dentry)) - i*MAX_DENTRY_PER_BLOCK;
         int actualDentrys = MAX_DENTRY_PER_BLOCK;
         if(remainDentrys > 0 && remainDentrys < MAX_DENTRY_PER_BLOCK){
             actualDentrys = remainDentrys;
@@ -86,6 +87,31 @@ int findBlockInodeInCWD(char * fileName){
     }
     return inode;
 }
+
+void a(){
+    int i = 0;
+    bool found = false;    
+    while(!found && i < MAX_DENTRY_PER_BLOCK && ((int)(cwd->size / sizeof(dentry)) - (i * MAX_DENTRY_PER_BLOCK)) > 0){
+        uint8 buffer[FLOPPY_BLOCK_SIZE];
+        int err = readFloppyDisk(cwd->block[i], buffer);
+        if(err == -1) return -1;
+        
+        // El total de dentrys a que tiene este bloque
+        int remainDentrys = (cwd->size/sizeof(dentry)) - i*MAX_DENTRY_PER_BLOCK;
+        int actualDentrys = MAX_DENTRY_PER_BLOCK;
+        if(remainDentrys > 0 && remainDentrys < MAX_DENTRY_PER_BLOCK){
+            actualDentrys = remainDentrys;
+        }
+        dentry *entries = (dentry *)buffer;
+        for(int j = 0; j < actualDentrys && !found; j++){ 
+            dentry entrie = entries[j];
+            printf("\n");
+            printf(entrie.name);
+        }
+        i++;
+    }
+}
+
 
 // Devuelve devuelve el puntero del inodo con nombre filename dentro del Current Work Directory
 // Si no lo encuentra retorna NULL
@@ -115,8 +141,9 @@ inode * createInode(fileType type){
     return newInode;
 }
 
+// TODO: chequeo que no se repita el nombre del archivo
 int createFile(fileType type, char * fileName){
-    //TODO: Esto hay que hacerlo con el current directory
+    //TODO: Esto hay que hacerlo con el current directory del proc
     int blockPos = getFreeBlock();
     if(blockPos == -1) goto error0;
 
@@ -128,24 +155,24 @@ int createFile(fileType type, char * fileName){
     strCopy(fileName, newDentry.name);
     newDentry.inode = blockPos;
 
-    // Guardo el dentry en el inodo tipo dir actual
-    if(root->size >= FLOPPY_BLOCK_SIZE * FILE_MAX_BLOCKS) goto error1;
+    if(cwd->size == FILE_MAX_SIZE) goto error1;
 
-    int dentryBlock = root->size / FLOPPY_BLOCK_SIZE;
-    int dentryOffset = root->size % FLOPPY_BLOCK_SIZE;
-    if(root->block[dentryBlock] == 0){
+    // Guardo el dentry del nuevo file en el cwd
+    int dentryBlock = cwd->size / FLOPPY_BLOCK_SIZE;
+    int dentryOffset = cwd->size % FLOPPY_BLOCK_SIZE;
+    if(cwd->block[dentryBlock] == 0){
         int freeBlock = getFreeBlock();
         if(freeBlock == -1) goto error1;
-        root->block[dentryBlock] = freeBlock;
+        cwd->block[dentryBlock] = freeBlock;
     }
 
     // Guardo el dentry en disco
     uint8 dentryBuff[FLOPPY_BLOCK_SIZE];
-    int floppyErr = readFloppyDisk(root->block[dentryBlock], dentryBuff);
+    int floppyErr = readFloppyDisk(cwd->block[dentryBlock], dentryBuff);
     if(floppyErr == -1) goto error1;
     
     memCopy(&newDentry, dentryBuff + dentryOffset, sizeof(dentry));
-    floppyErr = writeFloppyDisk(root->block[dentryBlock], dentryBuff);
+    floppyErr = writeFloppyDisk(cwd->block[dentryBlock], dentryBuff);
     if(floppyErr == -1) goto error1;
 
     // Guardo el nuevo inodo en disco
@@ -153,8 +180,8 @@ int createFile(fileType type, char * fileName){
     if(floppyErr == -1) goto error1;
 
     // Actualizo el inodo tipo dir actual
-    root->size += sizeof(dentry);
-    floppyErr = writeFloppyDisk(SUPER_BLOCK_POS+1, root);
+    cwd->size += sizeof(dentry);
+    floppyErr = writeFloppyDisk(cwdBlock, cwd); //cambiar el SUPER_BLOCK_POS por el bloque actual del cwd
     if(floppyErr == -1) goto error1;
 
     free(newInode);
@@ -254,15 +281,17 @@ void initFileSystem(){
         for(int i = 0; i < FS_BITMAP_SIZE; i++){
             sBlock->bitMap[i] = 0;
         }
-        sBlock->root = SUPER_BLOCK_POS+1;
+        sBlock->cwd = SUPER_BLOCK_POS+1;
         writeFloppyDisk(SUPER_BLOCK_POS, sBlock); 
 
         inode * newInode = createInode(DIR);
         getFreeBlock();
         writeFloppyDisk(SUPER_BLOCK_POS+1, newInode);
-        root = newInode;
+        cwd = newInode;
+        cwdBlock = SUPER_BLOCK_POS+1;
     }else{
-        readFloppyDisk(sBlock->root, buffer);
-        memCopy(buffer, root, sizeof(inode));
+        readFloppyDisk(sBlock->cwd, buffer);
+        memCopy(buffer, cwd, sizeof(inode));
+        cwdBlock = SUPER_BLOCK_POS+1;
     }
 }
