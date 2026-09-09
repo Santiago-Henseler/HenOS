@@ -1,6 +1,8 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+//TODO: optimizarlo en ram el fs porque leo todo de disco siempre
+
 // Headers extra
 #include <floppyDisk/floppy.h>
 #include <string.h>
