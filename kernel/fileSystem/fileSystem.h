@@ -43,4 +43,6 @@ int writeFile(char * fileName, uint8 * data, uint32 size);
 
 void * readFile(char * fileName);
 
+void ls();
+
 #endif

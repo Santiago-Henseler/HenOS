@@ -29,6 +29,11 @@ void main(uint32 memRamSize){
     printf("[info] Se inicio la memoria paginada\n");  
     printf("[info] Se inicio el driver del floppy disk\n");  
 
+    createFile(DIR, "NIGA");
+    createFile(DATA, "OAA");
+    createFile(DATA, "SAP");
+
+    ls();
 
     // TODO: terminar de implementar los procesos
     //
