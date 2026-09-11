@@ -18,11 +18,19 @@ typedef struct inode{
     uint16 block[FILE_MAX_BLOCKS];
 } inode;
 
+typedef struct nodeDirectory{
+    dentry * selfDentry;
+    struct nodeDirectory * previous;
+    struct nodeDirectory ** nodeDirectorys;
+    uint16 totalNodeDirectorys;
+} nodeDirectory;
+
 static superBlock sb;
 superBlock *sBlock = &sb;
 
 // TODO: esto deberia de ser parte de cada proceso
 inode *cwd;
+nodeDirectory * memFs;
 int cwdBlock;
 
 int getFreeBlock(){
@@ -61,30 +69,14 @@ int getFreeBlock(){
 int findBlockInodeInCWD(char * fileName){
     int inodeBlock = -1;
 
-    int i = 0;
-    bool found = false;    
-    while(!found && i < MAX_DENTRY_PER_BLOCK && ((int)(cwd->size / sizeof(dentry)) - (i * MAX_DENTRY_PER_BLOCK)) > 0){
-        uint8 buffer[FLOPPY_BLOCK_SIZE];
-        int err = readFloppyDisk(cwd->block[i], buffer);
-        if(err == -1) return -1;
-        
-        // El total de dentrys a que tiene este bloque
-        int remainDentrys = (cwd->size/sizeof(dentry)) - i*MAX_DENTRY_PER_BLOCK;
-        int actualDentrys = MAX_DENTRY_PER_BLOCK;
-        if(remainDentrys > 0 && remainDentrys < MAX_DENTRY_PER_BLOCK){
-            actualDentrys = remainDentrys;
+    bool found = false;
+    for(int i = 0; i < memFs->totalNodeDirectorys && !found; i++){
+        if(strCompare(memFs->nodeDirectorys[i]->selfDentry->name, fileName)){
+            inodeBlock = memFs->nodeDirectorys[i]->selfDentry->inodeBlock;
+            found = true;
         }
-
-        dentry *entries = (dentry *)buffer;
-        for(int j = 0; j < actualDentrys && !found; j++){ 
-            dentry entrie = entries[j];
-            if(strCompare(entrie.name, fileName)){
-                inodeBlock = entrie.inodeBlock;
-                found = true;
-            }
-        }
-        i++;
     }
+
     return inodeBlock;
 }
 
@@ -104,15 +96,11 @@ inode * findInodeInCWD(char * fileName){
 }
 
 inode * createInode(fileType type){
-    inode * newInode = (inode *)malloc(sizeof(inode));
+    inode * newInode = (inode *)calloc(sizeof(inode));
     if(newInode == NULL)
         return NULL;
 
     newInode->type = type;
-    newInode->size = 0;
-    for(int i = 0; i < FILE_MAX_BLOCKS; i++)
-        newInode->block[i] = 0;
-
     return newInode;
 }
 
@@ -156,6 +144,8 @@ int createFile(fileType type, char * fileName){
     cwd->size += sizeof(dentry);
     floppyErr = writeFloppyDisk(cwdBlock, cwd);
     if(floppyErr == -1) goto error1;
+
+    updateNodeDirectory(memFs, &newDentry);
 
     free(newInode);
     return 0;
@@ -242,49 +232,39 @@ void * readFile(char * fileName){
     return NULL;
 }
 
-void initFileSystem(){
-    uint8 buffer[FLOPPY_BLOCK_SIZE];
-    readFloppyDisk(SUPER_BLOCK_POS, buffer);
+nodeDirectory * newNodeDirectory(){
+    nodeDirectory * nodeDir = (nodeDirectory *)malloc(sizeof(nodeDirectory));
+    if(nodeDir == NULL)
+        return NULL;
 
-    memCopy(buffer, sBlock, sizeof(superBlock));
-
-    if(sBlock->code != FS_CODE){ // No hay filesystem creado
-        sBlock->code = FS_CODE; 
-        sBlock->inodes = 1;
-        for(int i = 0; i < FS_BITMAP_SIZE; i++){
-            sBlock->bitMap[i] = 0;
-        }
-        sBlock->root = SUPER_BLOCK_POS+1;
-        writeFloppyDisk(SUPER_BLOCK_POS, sBlock); 
-
-        inode * newInode = createInode(DIR);
-        getFreeBlock();
-        writeFloppyDisk(SUPER_BLOCK_POS+1, newInode);
-        cwd = newInode;
-        cwdBlock = SUPER_BLOCK_POS+1;
-    }else{
-        readFloppyDisk(sBlock->root, buffer);
-        memCopy(buffer, cwd, sizeof(inode));
-        cwdBlock = SUPER_BLOCK_POS+1;
-    }
+    nodeDir->selfDentry = malloc(sizeof(dentry));
+    nodeDir->previous = malloc(sizeof(nodeDirectory * ));
+    nodeDir->nodeDirectorys = malloc(sizeof(nodeDirectory *));
+    nodeDir->nodeDirectorys[0] = malloc(sizeof(nodeDirectory));
+    nodeDir->totalNodeDirectorys = 0;
+    
+    return nodeDir;
 }
 
-typedef struct memDirectory{
-    dentry ** dentrys;
-    uint16 totalDentrys;
-} memDirectory;
+// Levanta una estructura similar a un arbol para operar de manera mas rapida con el filesystem
+nodeDirectory * initNodeDirectory(uint16 inodeBlock, dentry * selfDentry, nodeDirectory * previous){
+    nodeDirectory * nodeDir = newNodeDirectory();
+    
+    if(selfDentry != NULL){
+        memCopy(selfDentry, nodeDir->selfDentry, sizeof(dentry)); 
+    }else if(selfDentry == NULL && previous == -1){
+        nodeDir->previous = nodeDir;
+        nodeDir->selfDentry = NULL; //TODO: crearle uno
+    }
 
-memDirectory * newMemDirectory(uint16 inodeBlock){
     inode actualInode; 
     uint8 buffer[FLOPPY_BLOCK_SIZE];
     readFloppyDisk(inodeBlock, buffer);
     memCopy(buffer, &actualInode, sizeof(inode));
 
-    memDirectory * memDir = (memDirectory *)malloc(sizeof(memDirectory));
-    memDir->totalDentrys = 0;
-    memDir->dentrys = malloc(sizeof(dentry *));
-    memDir->dentrys[0] = malloc(sizeof(dentry));
-
+    if(actualInode.type != DIR)
+        return nodeDir;
+   
     int i = 0;
     while(((int)(actualInode.size / sizeof(dentry)) - (i * MAX_DENTRY_PER_BLOCK)) > 0){
         uint8 buffer[FLOPPY_BLOCK_SIZE];
@@ -300,21 +280,51 @@ memDirectory * newMemDirectory(uint16 inodeBlock){
         dentry *entries = (dentry *)buffer;
         for(int j = 0; j < actualDentrys; j++){ 
             dentry entrie = entries[j];
-            memDir->totalDentrys++;
+            nodeDir->totalNodeDirectorys++;
             if(j != 0)
-                memDir->dentrys = realloc(memDir->dentrys, memDir->totalDentrys * sizeof(dentry *));
-            memDir->dentrys[memDir->totalDentrys-1] = (dentry *)malloc(sizeof(dentry));
-            memCopy(&entrie, memDir->dentrys[memDir->totalDentrys -1], sizeof(dentry)); 
+                nodeDir->nodeDirectorys = realloc(nodeDir->nodeDirectorys, nodeDir->totalNodeDirectorys * sizeof(nodeDirectory *));
+            nodeDir->nodeDirectorys[nodeDir->totalNodeDirectorys-1] = initNodeDirectory(entrie.inodeBlock, &entrie, nodeDir);
         }
         i++;
     }
-    return memDir;
+    return nodeDir;
 }
 
-void ls(){
-    memDirectory * a = newMemDirectory(cwdBlock);
+int updateNodeDirectory(nodeDirectory * actual, dentry * newDentry){
+    actual->totalNodeDirectorys++;
 
-    for(int i = 0; i < a->totalDentrys; i++){
-        printf("%s \n", a->dentrys[i]->name); 
+    nodeDirectory * newNode = newNodeDirectory();
+    newNode->previous = actual;
+    memCopy(newDentry, newNode->selfDentry, sizeof(dentry));
+    
+    actual->nodeDirectorys = realloc(actual->nodeDirectorys, actual->totalNodeDirectorys * sizeof(nodeDirectory *));
+    actual->nodeDirectorys[actual->totalNodeDirectorys-1] = newNode;
+} 
+
+int initFileSystem(){
+    uint8 buffer[FLOPPY_BLOCK_SIZE];
+    readFloppyDisk(SUPER_BLOCK_POS, buffer);
+
+    memCopy(buffer, sBlock, sizeof(superBlock));
+
+    if(sBlock->code != FS_CODE){ // No hay filesystem creado
+        sBlock->code = FS_CODE; 
+        sBlock->inodes = 1;
+        for(int i = 0; i < FS_BITMAP_SIZE; i++){
+            sBlock->bitMap[i] = 0;
+        }
+        sBlock->root = SUPER_BLOCK_POS+1;
+        writeFloppyDisk(SUPER_BLOCK_POS, sBlock); 
+
+        inode * newInode = createInode(DIR);
+        writeFloppyDisk(SUPER_BLOCK_POS+1, newInode);
+        cwd = newInode;
+        cwdBlock = SUPER_BLOCK_POS+1;
+    }else{
+        readFloppyDisk(sBlock->root, buffer);
+        memCopy(buffer, cwd, sizeof(inode));
+        cwdBlock = SUPER_BLOCK_POS+1;
     }
+
+    memCopy(initNodeDirectory(SUPER_BLOCK_POS+1, NULL, -1), memFs, sizeof(inode));
 }

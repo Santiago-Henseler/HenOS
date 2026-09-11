@@ -33,7 +33,7 @@ typedef enum fileType{
 } fileType;
 
 // Inicializa el fileSystem en memoria
-void initFileSystem();
+int initFileSystem();
 
 // Crea un archivo en el directorio actual
 int createFile(fileType type, char * fileName);
@@ -42,7 +42,5 @@ int createFile(fileType type, char * fileName);
 int writeFile(char * fileName, uint8 * data, uint32 size);
 
 void * readFile(char * fileName);
-
-void ls();
 
 #endif
