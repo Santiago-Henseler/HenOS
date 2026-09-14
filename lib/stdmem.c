@@ -57,13 +57,13 @@ void * getAllocBlock(uint32 size){
     while(act != NULL){
         // de todos los bloques agarro el mas chiquito
         if (!act->used && act->size >= realSize) {
-            if (!candidate || act->size < candidate->size)
-                candidate = act;
+            if(!candidate)
+                if (act->size < candidate->size)
+                    candidate = act;
         }
         last = act;
         act = act->next;
     }
-
     if(candidate == NULL){
         // si se recorrio todos y no entraba, pido otro bloque
         allockBlock * new = newAllockBlock();

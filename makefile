@@ -26,7 +26,7 @@ kernel.bin:
 	objcopy -O binary kernel.elf kernel.bin
 
 bootdisk:
-	dd if=/dev/zero of=disk.img bs=512 count=2880 # Comentar esta linea para mantener el filesystem
+	#dd if=/dev/zero of=disk.img bs=512 count=2880 # Comentar esta linea para mantener el filesystem
 	dd conv=notrunc if=bootloader of=disk.img bs=512 count=1 seek=0
 	dd if=kernel.bin of=disk.img bs=512 conv=notrunc seek=1
 	

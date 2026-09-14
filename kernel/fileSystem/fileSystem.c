@@ -155,7 +155,7 @@ int createFile(fileType type, char * fileName){
 }
 
 int writeFile(char * fileName, uint8 * bytes, uint32 size){
-    if(fileName == NULL || strLen(fileName) >= FILE_NAME_SIZE)
+    if(fileName == NULL || strLen(fileName) >= FILE_NAME_SIZE || bytes == NULL)
         return -1;
 
     // Obtengo el inodo
@@ -247,12 +247,13 @@ nodeDirectory * newNodeDirectory(){
 }
 
 // Levanta una estructura similar a un arbol para operar de manera mas rapida con el filesystem
+// selfDentry == NULL && previous == NULL para indicar que se empieza desde root
 nodeDirectory * initNodeDirectory(uint16 inodeBlock, dentry * selfDentry, nodeDirectory * previous){
     nodeDirectory * nodeDir = newNodeDirectory();
     
     if(selfDentry != NULL){
         memCopy(selfDentry, nodeDir->selfDentry, sizeof(dentry)); 
-    }else if(selfDentry == NULL && previous == -1){
+    }else if(selfDentry == NULL && previous == NULL){
         nodeDir->previous = nodeDir;
         nodeDir->selfDentry = NULL; //TODO: crearle uno
     }
@@ -317,6 +318,7 @@ int initFileSystem(){
         writeFloppyDisk(SUPER_BLOCK_POS, sBlock); 
 
         inode * newInode = createInode(DIR);
+        getFreeBlock();
         writeFloppyDisk(SUPER_BLOCK_POS+1, newInode);
         cwd = newInode;
         cwdBlock = SUPER_BLOCK_POS+1;
@@ -326,5 +328,5 @@ int initFileSystem(){
         cwdBlock = SUPER_BLOCK_POS+1;
     }
 
-    memCopy(initNodeDirectory(SUPER_BLOCK_POS+1, NULL, -1), memFs, sizeof(inode));
+    memCopy(initNodeDirectory(SUPER_BLOCK_POS+1, NULL, NULL), memFs, sizeof(inode));
 }
