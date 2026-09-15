@@ -35,10 +35,7 @@ void main(uint32 memRamSize){
     createFile(DIR, "DIRECTORIOOO");
     createFile(DATA, "SAPa");
 
-    int a = writeFile("OAA", "Hola mundo\n", 11);
-
-    int b = readFile("OAA");
-
+    
 
     // TODO: terminar de implementar los procesos
     //

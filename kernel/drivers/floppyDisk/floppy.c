@@ -77,6 +77,7 @@ void floppyReset(){
     waitFloppyInt();
 }
 
+// TODO: chequear tamaños a escribir
 int floppyDiskAction(int blockNum, uint8 buffer[FLOPPY_BLOCK_SIZE], bool write){
 
     if(blockNum >= FLOPPY_MAX_BLOCK)

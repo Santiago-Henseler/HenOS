@@ -38,7 +38,7 @@ int initFileSystem();
 // Crea un archivo en el directorio actual
 int createFile(fileType type, char * fileName);
 
-// Escribe size bytes en un archivo existente
+// Escribe size bytes en un archivo de tipo DATA existente
 int writeFile(char * fileName, uint8 * data, uint32 size);
 
 void * readFile(char * fileName);
