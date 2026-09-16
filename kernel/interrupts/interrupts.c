@@ -46,6 +46,8 @@ void clockInterrupt(InterruptRegisters * interruptRegs){
 
 void floppyDiskInterrupt(InterruptRegisters * interruptRegs){
     setFloppyInt();
+
+    // ACK de la interrupcion al PIC
     ackPic(interruptRegs->interrupt-SOFTWARE_INT);
 }
 
@@ -59,22 +61,33 @@ void (* hardwareHandlers[HARDWARE_INT])(InterruptRegisters * interruptRegs) = {
     &interruptHardware
 };
 
+void syscallInt(InterruptRegisters * interruptRegs){
+    printf("Ocurrio una syscall");
+}
+
+void kernelPanicInt(InterruptRegisters * interruptRegs){
+    printVga("[ERROR] KERNEL PANIC", RED); 
+    for(;;);
+}
+
+void (* extraIntHandlers[EXTRA_INT])(InterruptRegisters * interruptRegs) ={
+    &syscallInt, &kernelPanicInt
+};
+
 void interrupthandler(InterruptRegisters * interruptRegs){
 
-    if(interruptRegs->interrupt > (SOFTWARE_INT + HARDWARE_INT)){
-        printf("[Error]: interrupción no soportada\n");
+    if(interruptRegs->interrupt > (SOFTWARE_INT + HARDWARE_INT + EXTRA_INT)){
+        printf("[Error]: interrupcion no soportada\n");
         for(;;);
     }
 
-    if(interruptRegs->interrupt == 31){
-        printf("%i \n", interruptRegs->eax);
-        printf("%x \n", interruptRegs->eip);
-
-        actualProcess->ip = interruptRegs->eip;
-
-    }else if(interruptRegs->interrupt > SOFTWARE_INT-1){
-        hardwareHandlers[interruptRegs->interrupt-SOFTWARE_INT](interruptRegs);
-    }else{
+    if(interruptRegs->interrupt < SOFTWARE_INT){
         interruptSoftware(interruptRegs);
+    }else if(interruptRegs->interrupt > SOFTWARE_INT+HARDWARE_INT-1){
+
+        int a  = interruptRegs->interrupt - (SOFTWARE_INT+HARDWARE_INT);
+        extraIntHandlers[a](interruptRegs);
+    }else{
+        hardwareHandlers[interruptRegs->interrupt-SOFTWARE_INT](interruptRegs);
     }
 }

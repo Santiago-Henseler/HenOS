@@ -8,7 +8,15 @@
 #include <idt.h>
 #include <pic.h>
 #include "../process/process.h"    
-#include "../drivers/floppyDisk/floppy.h"
+#include <floppyDisk/floppy.h>
+
+// Total de interrupciones por hardware
+#define HARDWARE_INT 16
+
+// Cantidad de interrupciones por software
+#define SOFTWARE_INT 32 
+
+#define EXTRA_INT 2
 
 typedef struct {
     uint32 gs , fs, es, ds;                               // Data segment

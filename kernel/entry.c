@@ -21,21 +21,12 @@ void main(uint32 memRamSize){
     initMemBlock(memRamSize - kernelSize);
     initPageTable(memRamSize - kernelSize);
     initFloppyDisk();
+    initFileSystem();
     
     printf("[Info] Se entro en modo protegido y se activaron las interrupciones \n");
     printf("[Info] Se inicio la memoria en bloques, espacio disponible: %i\n", memRamSize - kernelSize);
     printf("[info] Se inicio la memoria paginada\n");  
     printf("[info] Se inicio el driver del floppy disk\n");  
-    
-    initFileSystem();
-
-
-    createFile(DATA, "OAA");
-    createFile(DATA, "SAP");
-    createFile(DIR, "DIRECTORIOOO");
-    createFile(DATA, "SAPa");
-
-    
 
     // TODO: terminar de implementar los procesos
     //

@@ -1,8 +1,15 @@
 #include "floppy.h"
 
 static uint8 floppyDmaBuffer[FLOPPY_BLOCK_SIZE] __attribute__((aligned(0x1000)));
-bool floppyInterrupt = false;
 
+typedef struct floppyConfig{
+    uint8 sectors;
+    uint8 cylinders;
+} floppyConfig;
+
+floppyConfig * floppyInfo = NULL;
+
+bool floppyInterrupt = false;
 void setFloppyInt(){
     floppyInterrupt = true;
 }
@@ -10,7 +17,6 @@ void setFloppyInt(){
 void waitFloppyInt(){
     while(!floppyInterrupt)
         continue;
-
     floppyInterrupt = false;
 }
 
@@ -80,7 +86,7 @@ void floppyReset(){
 // TODO: chequear tamaños a escribir
 int floppyDiskAction(int blockNum, uint8 buffer[FLOPPY_BLOCK_SIZE], bool write){
 
-    if(blockNum >= FLOPPY_MAX_BLOCK)
+    if(blockNum >= floppyInfo->cylinders * floppyInfo->sectors * FLOPPY_HEADS)
         return -1;
 
     if(write)
@@ -88,9 +94,9 @@ int floppyDiskAction(int blockNum, uint8 buffer[FLOPPY_BLOCK_SIZE], bool write){
 
     setupDMA(floppyDmaBuffer, FLOPPY_BLOCK_SIZE, write ? DMA_WRITE : DMA_READ);
 
-    uint8 head = (blockNum / 18) % 2;
-    uint8 cylinder = blockNum / 36;
-    uint8 sector = (blockNum % 18) + 1;
+    uint8 head = (blockNum / floppyInfo->sectors) % FLOPPY_HEADS;
+    uint8 cylinder = blockNum / (floppyInfo->sectors * FLOPPY_HEADS);
+    uint8 sector = (blockNum % floppyInfo->sectors) + 1;
 
     floppySeek(cylinder, head);
 
@@ -133,13 +139,46 @@ int readFloppyDisk(int blockNum, uint8 buffer[FLOPPY_BLOCK_SIZE]){
     return floppyDiskAction(blockNum, buffer, false);
 }
 
+int setupInfoFloppyDisk(){
+    outB(CMOS_FLOPPY_INFO_OUT, CMOS_FLOPPY_INFO);
+    uint8 size = inB(CMOS_FLOPPY_INFO_IN);
+
+    floppyConfig * info = (floppyConfig *)malloc(sizeof(floppyInfo));
+    if(info == NULL)
+        return -1;
+
+    if(size >> 4 == FLOPPY_360KB){
+        info->cylinders = FLOPPY_CYLINDERS_360KB;
+        info->sectors = FLOPPY_SECTORS_360KB;
+    }else if(size >> 4 == FLOPPY_720KB){
+        info->cylinders = FLOPPY_CYLINDERS_720KB;
+        info->sectors = FLOPPY_SECTORS_720KB;
+    }else if(size >> 4 == FLOPPY_144MB){
+        info->cylinders = FLOPPY_CYLINDERS_144MB;
+        info->sectors = FLOPPY_SECTORS_144MB;
+    }else if(size >> 4 == FLOPPY_288MB){
+        info->cylinders = FLOPPY_CYLINDERS_288MB;
+        info->sectors = FLOPPY_SECTORS_288MB;
+    }else{
+        return -1;
+    }
+
+    floppyInfo = info;
+
+    return 0;    
+}
+
 void initFloppyDisk(){
+
+    if(setupInfoFloppyDisk() == -1)
+        kernelPanic();
+
     sendFloppyCommand(FLOPPY_VERSION_COMMAND);
     uint8 version = reciveFloppyCommand();
 
     if(version != 0x90){
         printVga("No hay soporte para esa version de floppy disk", RED);
-        for(;;);
+        kernelPanic();
     }
     // Configuro el floppy disk
     sendFloppyCommand(FLOPPY_CONFIGURE_COMMAND);

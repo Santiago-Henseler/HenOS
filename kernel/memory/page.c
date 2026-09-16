@@ -1,19 +1,24 @@
 #include "page.h"
 
-// TODO: deberia tener un directory por proceso
+// TODO: deberia tener un page table por proceso
 
 extern uint8 kernelEnd;
 extern uint8 kernelStart;
 
 extern void setPageDirectory(pageDirectoryEntry* pd);
 extern void startPagination();
-void mapPage(void *pa, void *va, uint32 flags);
+
+int mapPage(void *pa, void *va, uint32 flags);
 
 pageDirectoryEntry * pageDirectory = PAGE_FLAG_NO_PRESENT;  
 
 void initPageTable(uint32 freeMemSize){
     
-    pageDirectory = ALIGN(getRamBlock(), PAGE_SIZE); 
+    void * ramBlock = getRamBlock();
+    if(ramBlock == NULL)
+        kernelPanic();
+
+    pageDirectory = ALIGN(ramBlock, PAGE_SIZE); 
 
     for(int i = 0; i < PAGE_DIR_SIZE; i++){
         pageDirectory[i] = PAGE_FLAG_NO_PRESENT; 
@@ -32,9 +37,13 @@ void initPageTable(uint32 freeMemSize){
     startPagination();
 }
  
-pageTableEntry * newPageTable(){
+pageTableEntry * newPageTableEntry(){
 
-    pageTableEntry * pageTable = (pageTableEntry *)ALIGN(getRamBlock(), 4096);
+    void * ramBlock = getRamBlock();
+    if(ramBlock == NULL)
+        return NULL;
+
+    pageTableEntry * pageTable = (pageTableEntry *)ALIGN(ramBlock, 4096);
 
     for(int i = 0; i < PAGE_TABLE_SIZE; i++){
         pageTable[i] = PAGE_FLAG_NO_PRESENT; 
@@ -43,28 +52,35 @@ pageTableEntry * newPageTable(){
     return pageTable;
 }  
 
-void mapPage(void *pa, void *va, uint32 flags){
-    //TODO: agregar mejores chequeos
+int mapPage(void *pa, void *va, uint32 flags){
     uint32 pageDirPos = ((uint32)va & VA_TO_PD_MASK) >> 22;
     uint32 pageTablePos = ((uint32)va & VA_TO_PT_MASK) >> 12;
 
     if (!(pageDirectory[pageDirPos] & PAGE_FLAG_PRESENT)) {
-        pageTableEntry *newP = newPageTable();
+        pageTableEntry *newP = newPageTableEntry();
+        if(newP == NULL)
+            return -1;
         pageDirectory[pageDirPos] = ((uint32)newP & PDE_TO_PT_MASK) | PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE;
-        mapPage(newP, newP, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE );
+        if(mapPage(newP, newP, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE ) == -1)
+            return -1;
     }
 
     pageTableEntry *pageTable = (pageTableEntry *)(pageDirectory[pageDirPos] & PDE_TO_PT_MASK);
 
     if (pageTable[pageTablePos] & PAGE_FLAG_PRESENT)
-        return; // TODO: esta pagina fue ya mapeada
+        return -1;
 
     pageTable[pageTablePos] = ((uint32)pa & PA_TO_ADDR_MASK) | flags;
+    
+    return 0;
 }
 
 void * getPage(){
 
     void * addr = ALIGN(getRamBlock(), PAGE_SIZE);
+
+    if(addr == NULL)
+        return NULL;
 
     mapPage(addr, addr, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE | PAGE_FLAG_WT);
 
@@ -72,7 +88,8 @@ void * getPage(){
 }
 
 void freePage(void * va){
-    // TODO: controlar el addr que te pasan
+    if(va == NULL)
+        return;
 
     uint32 pageDirPos = ((uint32)va & VA_TO_PD_MASK) >> 22;
     uint32 pageTablePos = ((uint32)va & VA_TO_PT_MASK) >> 12;
@@ -85,5 +102,4 @@ void freePage(void * va){
     pageTable[pageTablePos] = PAGE_FLAG_NO_PRESENT;
 
     freeBlock(addr);
-
 }

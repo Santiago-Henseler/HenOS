@@ -16,6 +16,7 @@ asm:
 	nasm -f elf32 kernel/kernelEntry.asm -o kernelEntry.o
 	nasm -f elf32 kernel/drivers/io.asm -o ioAsm.o
 	nasm -f elf32 kernel/interrupts/interrupts.asm -o asmInterrupts.o
+	nasm -f elf32 kernel/interrupts/kernelPanic.asm -o asmKernelPanic.o
 	nasm -f elf32 kernel/memory/page.asm -o asmPage.o
 	nasm -f elf32 kernel/syscall/syscall.asm -o asmSyscal.o
 	nasm -f elf32 kernel/process/process.asm -o asmProcess.o
@@ -26,7 +27,7 @@ kernel.bin:
 	objcopy -O binary kernel.elf kernel.bin
 
 bootdisk:
-	#dd if=/dev/zero of=disk.img bs=512 count=2880 # Comentar esta linea para mantener el filesystem
+	dd if=/dev/zero of=disk.img bs=512 count=5760 # Comentar esta linea para mantener el filesystem
 	dd conv=notrunc if=bootloader of=disk.img bs=512 count=1 seek=0
 	dd if=kernel.bin of=disk.img bs=512 conv=notrunc seek=1
 	

@@ -4,7 +4,7 @@
 // Headers extra
 #include <stdint.h>
 #include <block.h>
-#include <vga/vga.h>
+#include <kernelPanic.h>
 
 // Cantidad de entradas en la page directory
 #define PAGE_DIR_SIZE 1024
@@ -71,12 +71,12 @@ typedef uint32 pageTableEntry;
 
 // Inicia las tablas de pagina, mapea el kernel
 // la memoria de video y los structs de memoria en bloques
-void initPageTable();
+void initPageTable(uint32 freeMemSize);
 
 // Devuelve un puntero a una direccion de memoria virtual paginada
 void * getPage();
 
-void mapPage(void *pa, void *va, uint32 flags);
+int mapPage(void *pa, void *va, uint32 flags); // TODO: chequear si dejarlo publico o no
 
 void freePage(void * va);
 

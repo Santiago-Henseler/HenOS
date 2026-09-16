@@ -24,7 +24,6 @@ void initMemBlock(uint32 freeMemSize){
     for(int i = 1; i < blocks-1; i++){ 
         block[i].addr = blockAddr + i*(PAGE_SIZE);
         block[i].next = &block[i+1];
-        //memSet(block[i].addr, 1, PAGE_SIZE); solo para debug 
     }
 
     block[blocks-1].addr = blockAddr+(blocks-1)*PAGE_SIZE;
@@ -35,7 +34,7 @@ void initMemBlock(uint32 freeMemSize){
 
 void * getRamBlock(){
 
-    if(!rootBlock) // TODO: No hay mas memoria disponible
+    if(!rootBlock) // No hay mas memoria disponible
         return NULL;
 
     memBlock * block = rootBlock;
@@ -48,7 +47,6 @@ void * getRamBlock(){
 }
 
 void freeBlock(void * addr){
-    //TODO: agregar mejore chequeos
     if(!addr)
         return;
 

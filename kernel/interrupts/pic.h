@@ -17,12 +17,6 @@
 // Fin de interrupcion
 #define FIN_INT 0x20 
 
-// Total de interrupciones por hardware
-#define HARDWARE_INT 16
-
-// Cantidad de interrupciones por software
-#define SOFTWARE_INT 32 
-
 // Mapeo las interrupciones por hardwarer a la IDT
 void mapPic();
 
