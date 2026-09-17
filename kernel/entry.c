@@ -1,13 +1,12 @@
-// TODO: controlar los inputs de todas las lib (NULLs, valores validos etc)
 #include <vga/vga.h>
 #include <stdio.h>
 #include <idt.h>
 #include <block.h>
 #include <page.h>
-#include <syscall.h>
 #include <floppyDisk/floppy.h>
 #include <fileSystem.h>
 
+#include <syscallHandler.h>
 #include "process/process.h"
 
 extern uint8 kernelEnd;

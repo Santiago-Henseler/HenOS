@@ -13,7 +13,7 @@ int printf(char* str, ...){
     va_start(args, str);
 
     if(!strContains(str, '%')){
-        printVga(str, WHITE); 
+        writeVga(str); 
         return 0;
     }
 
@@ -68,7 +68,7 @@ int printf(char* str, ...){
         }
     }
 
-    printVga(txt, WHITE);
+    writeVga(txt);
     free(txt);
     
     va_end(args);

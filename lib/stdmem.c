@@ -12,7 +12,7 @@ typedef struct allockBlock {
 allockBlock * rootAllocBlock = NULL;
 
 allockBlock * newAllockBlock(){
-    allockBlock* new = (allockBlock *)getPage();
+    allockBlock* new = (allockBlock *)page();
     if(new == NULL) 
         return NULL;
 

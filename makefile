@@ -18,7 +18,7 @@ asm:
 	nasm -f elf32 kernel/interrupts/interrupts.asm -o asmInterrupts.o
 	nasm -f elf32 kernel/interrupts/kernelPanic.asm -o asmKernelPanic.o
 	nasm -f elf32 kernel/memory/page.asm -o asmPage.o
-	nasm -f elf32 kernel/syscall/syscall.asm -o asmSyscal.o
+	nasm -f elf32 lib/syscall.asm -o asmSyscal.o
 	nasm -f elf32 kernel/process/process.asm -o asmProcess.o
 
 kernel.bin:	

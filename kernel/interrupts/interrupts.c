@@ -62,9 +62,7 @@ void (* hardwareHandlers[HARDWARE_INT])(InterruptRegisters * interruptRegs) = {
 };
 
 void syscallInt(InterruptRegisters * interruptRegs){
-    
-    printf("Ocurrio la syscall %i \n", interruptRegs->eax);
-    printf("%i", interruptRegs->edx);
+    interruptRegs->eax = syscallHandler(interruptRegs->eax, interruptRegs->ebx, interruptRegs->ecx, interruptRegs->edx);
 }
 
 void kernelPanicInt(InterruptRegisters * interruptRegs){

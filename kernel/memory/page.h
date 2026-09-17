@@ -2,6 +2,7 @@
 #define PAGE_H
 
 // Headers extra
+#include <vga/vga.h>
 #include <stdint.h>
 #include <block.h>
 #include <kernelPanic.h>

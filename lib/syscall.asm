@@ -16,3 +16,17 @@ read:
     mov ecx, [esp+8]    ; Size a leer
     int 0x30    
     ret
+
+global writeVga
+writeVga:
+    mov eax, 0x2        ; Cargo el numero de syscall 
+    mov ebx, [esp+4]    ; De donde leer
+    int 0x30    
+    ret
+
+;; TODO: ponerle bien el nombre xd
+global page
+page:
+    mov eax, 0x3
+    int 0x30
+    ret

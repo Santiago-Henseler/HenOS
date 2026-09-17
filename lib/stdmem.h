@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <page.h>
+#include <syscall.h>
 
 #define NULL 0
 
