@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdmem.h>
 #include <stdint.h>
+#include <kernelPanic.h>
 
 // Bloque donde se encuentra el superBloque
 #define SUPER_BLOCK_POS 50
@@ -33,7 +34,7 @@ typedef enum fileType{
 } fileType;
 
 // Inicializa el fileSystem en memoria
-int initFileSystem();
+void initFileSystem();
 
 // Crea un archivo en el directorio actual
 int createFile(fileType type, char * fileName);

@@ -325,9 +325,10 @@ int updateNodeDirectory(nodeDirectory * actual, dentry * newDentry){
     return 0;
 } 
 
-int initFileSystem(){
+void initFileSystem(){
     uint8 buffer[FLOPPY_BLOCK_SIZE];
-    if(readFloppyDisk(SUPER_BLOCK_POS, buffer)) return -1;
+    if(readFloppyDisk(SUPER_BLOCK_POS, buffer)) 
+        kernelPanic();
 
     memCopy(buffer, sBlock, sizeof(superBlock));
 
@@ -338,11 +339,15 @@ int initFileSystem(){
             sBlock->bitMap[i] = 0;
         }
         sBlock->root = SUPER_BLOCK_POS+1;
-        if(writeFloppyDisk(SUPER_BLOCK_POS, sBlock) == -1) return -1; 
+        if(writeFloppyDisk(SUPER_BLOCK_POS, sBlock) == -1) 
+            kernelPanic(); 
 
         inode * newInode = createInode(DIR);
-        if(newInode == NULL || getFreeBlock() == -1) return -1;
-        if(writeFloppyDisk(SUPER_BLOCK_POS+1, newInode) == -1) return -1;
+        if(newInode == NULL || getFreeBlock() == -1) 
+            kernelPanic();
+        if(writeFloppyDisk(SUPER_BLOCK_POS+1, newInode) == -1) 
+            kernelPanic();
+
         cwd = newInode;
         cwdBlock = SUPER_BLOCK_POS+1;
     }else{
@@ -353,6 +358,7 @@ int initFileSystem(){
 
     nodeDirectory * nodeDir = initNodeDirectory(SUPER_BLOCK_POS+1, NULL, NULL);
     if(nodeDir == NULL)
-        return -1;
+        kernelPanic();
+
     memCopy(nodeDir, memFs, sizeof(nodeDirectory));
 }

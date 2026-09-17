@@ -94,6 +94,9 @@ char * strCutAt(char ** str, char c){
     bool cut = false;
 
     char * firstHalf = (char *)malloc(strLen(string) + 1);
+    if(firstHalf == NULL)
+        return NULL;
+
     char *result = firstHalf;
 
     while (*string && !cut){

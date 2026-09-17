@@ -88,6 +88,9 @@ char * uIntToBin(int i){
     }    
     
     char * bin = (char *) malloc(sizeof(char) * (33 - index));
+    if(bin == NULL)
+        return NULL;
+        
     bin[32-index] = '\0';
 
     for(int j = 0; j < 32-index; j++){
