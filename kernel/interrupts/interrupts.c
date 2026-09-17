@@ -62,7 +62,9 @@ void (* hardwareHandlers[HARDWARE_INT])(InterruptRegisters * interruptRegs) = {
 };
 
 void syscallInt(InterruptRegisters * interruptRegs){
-    printf("Ocurrio una syscall");
+    
+    printf("Ocurrio la syscall %i \n", interruptRegs->eax);
+    printf("%i", interruptRegs->edx);
 }
 
 void kernelPanicInt(InterruptRegisters * interruptRegs){
@@ -84,9 +86,7 @@ void interrupthandler(InterruptRegisters * interruptRegs){
     if(interruptRegs->interrupt < SOFTWARE_INT){
         interruptSoftware(interruptRegs);
     }else if(interruptRegs->interrupt > SOFTWARE_INT+HARDWARE_INT-1){
-
-        int a  = interruptRegs->interrupt - (SOFTWARE_INT+HARDWARE_INT);
-        extraIntHandlers[a](interruptRegs);
+        extraIntHandlers[interruptRegs->interrupt - (SOFTWARE_INT+HARDWARE_INT)](interruptRegs);
     }else{
         hardwareHandlers[interruptRegs->interrupt-SOFTWARE_INT](interruptRegs);
     }
