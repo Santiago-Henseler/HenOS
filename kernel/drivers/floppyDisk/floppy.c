@@ -7,7 +7,8 @@ typedef struct floppyConfig{
     uint8 cylinders;
 } floppyConfig;
 
-floppyConfig * floppyInfo = NULL;
+floppyConfig * floppyInfo1 = NULL;
+floppyConfig * floppyInfo2 = NULL;
 
 bool floppyInterrupt = false;
 void setFloppyInt(){
@@ -46,9 +47,9 @@ void sendFloppyCommand(uint8 command){
     outB(FLOPPY_DATA_PORT, command);
 }
 
-void floppySeek(uint8 cylinder, uint8 head) {
+void floppySeek(uint8 cylinder, uint8 head, uint8 driver) {
     sendFloppyCommand(FLOPPY_SEEK_COMMAND);
-    sendFloppyCommand((head << 2) | 0);
+    sendFloppyCommand((head << 2) | driver);
     sendFloppyCommand(cylinder);
 
     waitFloppyInt();
@@ -83,22 +84,35 @@ void floppyReset(){
     waitFloppyInt();
 }
 
-// TODO: chequear tamaños a escribir
 int floppyDiskAction(int blockNum, uint8 buffer[FLOPPY_BLOCK_SIZE], bool write){
 
-    if(blockNum >= floppyInfo->cylinders * floppyInfo->sectors * FLOPPY_HEADS)
-        return -1;
+    uint8 driver = 0;
+    uint8 head = (blockNum / floppyInfo1->sectors) % FLOPPY_HEADS;
+    uint8 cylinder = blockNum / (floppyInfo1->sectors * FLOPPY_HEADS);
+    uint8 sector = (blockNum % floppyInfo1->sectors) + 1;
+
+    if(blockNum >= floppyInfo1->cylinders * floppyInfo1->sectors * FLOPPY_HEADS)
+        if(floppyInfo2 != NULL)
+            if(blockNum >= floppyInfo1->cylinders * floppyInfo1->sectors * FLOPPY_HEADS + floppyInfo2->cylinders * floppyInfo2->sectors * FLOPPY_HEADS)
+                return -1;
+            else{
+                return -1;
+                // TODO
+                driver = 1;
+                head = (blockNum - (floppyInfo1->cylinders * floppyInfo1->sectors * FLOPPY_HEADS) / floppyInfo2->sectors) % FLOPPY_HEADS;
+                cylinder = (blockNum - (floppyInfo1->cylinders * floppyInfo1->sectors * FLOPPY_HEADS)) / (floppyInfo2->sectors * FLOPPY_HEADS);
+                sector = (blockNum- (floppyInfo1->cylinders * floppyInfo1->sectors * FLOPPY_HEADS) % floppyInfo2->sectors) + 1;
+            }
+        else
+            return -1;
 
     if(write)
         memCopy(buffer, floppyDmaBuffer, FLOPPY_BLOCK_SIZE);
 
     setupDMA(floppyDmaBuffer, FLOPPY_BLOCK_SIZE, write ? DMA_WRITE : DMA_READ);
 
-    uint8 head = (blockNum / floppyInfo->sectors) % FLOPPY_HEADS;
-    uint8 cylinder = blockNum / (floppyInfo->sectors * FLOPPY_HEADS);
-    uint8 sector = (blockNum % floppyInfo->sectors) + 1;
 
-    floppySeek(cylinder, head);
+    floppySeek(cylinder, head, 0);
 
     // Indico la accion a ejecutar
     sendFloppyCommand(write ? (FLOPPY_MT | FLOPPY_MFM | 0x5) : (FLOPPY_MT | FLOPPY_MFM | 0x6 ));
@@ -143,27 +157,53 @@ int setupInfoFloppyDisk(){
     outB(CMOS_FLOPPY_INFO_OUT, CMOS_FLOPPY_INFO);
     uint8 size = inB(CMOS_FLOPPY_INFO_IN);
 
-    floppyConfig * info = (floppyConfig *)malloc(sizeof(floppyInfo));
-    if(info == NULL)
+    floppyConfig * infoFloppy1 = (floppyConfig *)malloc(sizeof(floppyConfig));
+    if(infoFloppy1 == NULL)
         return -1;
 
+    // Chequero por el primer floppy
     if(size >> 4 == FLOPPY_360KB){
-        info->cylinders = FLOPPY_CYLINDERS_360KB;
-        info->sectors = FLOPPY_SECTORS_360KB;
+        infoFloppy1->cylinders = FLOPPY_CYLINDERS_360KB;
+        infoFloppy1->sectors = FLOPPY_SECTORS_360KB;
     }else if(size >> 4 == FLOPPY_720KB){
-        info->cylinders = FLOPPY_CYLINDERS_720KB;
-        info->sectors = FLOPPY_SECTORS_720KB;
+        infoFloppy1->cylinders = FLOPPY_CYLINDERS_720KB;
+        infoFloppy1->sectors = FLOPPY_SECTORS_720KB;
     }else if(size >> 4 == FLOPPY_144MB){
-        info->cylinders = FLOPPY_CYLINDERS_144MB;
-        info->sectors = FLOPPY_SECTORS_144MB;
+        infoFloppy1->cylinders = FLOPPY_CYLINDERS_144MB;
+        infoFloppy1->sectors = FLOPPY_SECTORS_144MB;
     }else if(size >> 4 == FLOPPY_288MB){
-        info->cylinders = FLOPPY_CYLINDERS_288MB;
-        info->sectors = FLOPPY_SECTORS_288MB;
+        infoFloppy1->cylinders = FLOPPY_CYLINDERS_288MB;
+        infoFloppy1->sectors = FLOPPY_SECTORS_288MB;
     }else{
         return -1;
     }
+    floppyInfo1 = infoFloppy1;
 
-    floppyInfo = info;
+    // Chequeo si hay un segundo floppy
+    uint8 secondFloppySize = size & 0x0F;
+    if(secondFloppySize != 0){
+        floppyConfig * infoFloppy2 = (floppyConfig *)malloc(sizeof(floppyConfig));
+        if(infoFloppy2 == NULL)
+            return -1;
+
+        if(secondFloppySize == FLOPPY_360KB){
+            infoFloppy2->cylinders = FLOPPY_CYLINDERS_360KB;
+            infoFloppy2->sectors = FLOPPY_SECTORS_360KB;
+        }else if(secondFloppySize == FLOPPY_720KB){
+            infoFloppy2->cylinders = FLOPPY_CYLINDERS_720KB;
+            infoFloppy2->sectors = FLOPPY_SECTORS_720KB;
+        }else if(secondFloppySize == FLOPPY_144MB){
+            infoFloppy2->cylinders = FLOPPY_CYLINDERS_144MB;
+            infoFloppy2->sectors = FLOPPY_SECTORS_144MB;
+        }else if(secondFloppySize == FLOPPY_288MB){
+            infoFloppy2->cylinders = FLOPPY_CYLINDERS_288MB;
+            infoFloppy2->sectors = FLOPPY_SECTORS_288MB;
+        }else{
+            return -1;
+        }
+
+        floppyInfo2 = infoFloppy2;
+    }
 
     return 0;    
 }

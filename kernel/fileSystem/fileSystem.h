@@ -1,7 +1,7 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-//TODO: optimizarlo en ram el fs porque leo todo de disco siempre
+// TODO: agregar para eliminar archivos y para abrir archivos (cargarlos a memoria)
 
 // Headers extra
 #include <floppyDisk/floppy.h>
@@ -14,6 +14,8 @@
 // Bloque donde se encuentra el superBloque
 #define SUPER_BLOCK_POS 50
 
+
+// TODO: poner tamaño real 
 // Tamaño del bitmap para poder saber que bloques estan libres
 #define FS_BITMAP_SIZE 352 // (FLOPPY_MAX_BLOCK - SUPER_BLOCK_POS - 6 / 8) - 1 (resto 6 y 1 para que sea multiplo de 8)
 

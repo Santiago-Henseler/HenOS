@@ -30,9 +30,10 @@ bootdisk:
 	dd if=/dev/zero of=disk.img bs=512 count=5760 # Comentar esta linea para mantener el filesystem
 	dd conv=notrunc if=bootloader of=disk.img bs=512 count=1 seek=0
 	dd if=kernel.bin of=disk.img bs=512 conv=notrunc seek=1
+	dd if=/dev/zero of=disk2.img bs=512 count=5760
 	
 run:
-	qemu-system-i386 -machine q35 -m 512M -fda disk.img
+	qemu-system-i386 -machine q35 -m 512M -fda disk.img -fdb disk2.img
 
 gdb:
 	qemu-system-i386 -machine q35 -fda disk.img -gdb tcp::26000 -S & \
