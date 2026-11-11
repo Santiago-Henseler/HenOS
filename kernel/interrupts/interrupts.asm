@@ -10,7 +10,8 @@ idtLoad:
 
 extern interrupthandler
 
-commonInterruptHandler:    
+commonInterruptHandler:  
+    cli                             ; Pauso las interrupciones de hardware
     pusha                           ; Pusheo registros de proposito general al stack
                   
     push ds                         ; Guardo el data segment actual
@@ -39,6 +40,7 @@ commonInterruptHandler:
 
     add esp, 8
 
+    sti                               ; Reestablezco las interrupciones
     iret
 
 ;; Declaración de todos los interrupt handlers usando macro

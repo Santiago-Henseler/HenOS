@@ -1,11 +1,12 @@
-#include <vga/vga.h>
-#include <stdio.h>
+#include <gdt.h>
+#include <tss.h>
 #include <idt.h>
-#include <block.h>
 #include <page.h>
-#include <floppyDisk/floppy.h>
-#include <rtc/rtc.h>
+#include <block.h>
+#include <stdio.h>
+#include <vga/vga.h>
 #include <fileSystem.h>
+#include <floppyDisk/floppy.h>
 
 #include <syscallHandler.h>
 #include "process/process.h"
@@ -13,8 +14,11 @@
 extern uint8 kernelEnd;
 extern uint8 kernelStart;
 
+// Para debug outB(0xE9, '0');
 void main(uint32 memRamSize){
     clearVga();
+    initGdt();
+    initTss();
     initInterrupts();
     
     uint32 kernelSize = (uint32)&kernelEnd - (uint32)&kernelStart;

@@ -1,6 +1,6 @@
 CFLAGS = -masm=intel -m32 -ffreestanding -nostdlib -nostdinc -fno-stack-protector -fno-pic -Wall -Wextra -g
-LIBS = -Ilib -Ikernel/drivers  -Ikernel/memory -Ikernel/interrupts -Ikernel/syscall -Ikernel/fileSystem
-KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c lib/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c
+LIBS = -Ilib -Ikernel/drivers  -Ikernel/memory -Ikernel/interrupts -Ikernel/syscall -Ikernel/fileSystem -Ikernel/gdt
+KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c lib/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c kernel/gdt/*.c
 
 all: clean bootloader asm kernel.bin bootdisk
 debug: clean bootloader asm kernel.bin bootdisk gdb
@@ -18,8 +18,10 @@ asm:
 	nasm -f elf32 kernel/interrupts/interrupts.asm -o asmInterrupts.o
 	nasm -f elf32 kernel/interrupts/kernelPanic.asm -o asmKernelPanic.o
 	nasm -f elf32 kernel/memory/page.asm -o asmPage.o
-	nasm -f elf32 lib/syscall.asm -o asmSyscal.o
 	nasm -f elf32 kernel/process/process.asm -o asmProcess.o
+	nasm -f elf32 kernel/gdt/gdt.asm -o asmGdt.o
+
+	nasm -f elf32 lib/syscall.asm -o asmSyscal.o
 
 kernel.bin:	
 	gcc $(CFLAGS) $(LIBS) -c $(KERNELFILES)
@@ -32,7 +34,7 @@ bootdisk:
 	dd if=kernel.bin of=disk.img bs=512 conv=notrunc seek=1
 	
 run:
-	qemu-system-i386 -machine q35 -m 512M -fda disk.img
+	qemu-system-i386 -debugcon stdio -machine q35 -m 512M -fda disk.img
 
 gdb:
 	qemu-system-i386 -machine q35 -fda disk.img -gdb tcp::26000 -S & \
