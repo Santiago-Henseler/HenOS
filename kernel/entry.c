@@ -29,18 +29,17 @@ void main(uint32 memRamSize){
     printf("[info] Se inicio el driver del floppy disk\n");  
 
     // TODO: terminar de implementar los procesos
-    //, 
-    // initProcess(); 
-    //
-    // LEVANTAR PROCESO DE DISCO
-    //uint8 buffer[FLOPPY_BLOCK_SIZE];
-    //int err = readFloppyDisk(52, buffer);
-    // 
-    //mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) 0x280000), PAGE_FLAG_PRESENT );
-    //memCopy(buffer, ((char*) 0x280000), 80);
-    //newProcess(((char*) 0x280000));
-    //
-    //execProcess(0);
+     
+    initProcess(); 
+    
+    uint8 buffer[FLOPPY_BLOCK_SIZE];
+    int err = readFloppyDisk(52, buffer);
+     
+    mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) 0x280000), PAGE_FLAG_PRESENT | PAGE_FLAG_USER);
+    memCopy(buffer, ((char*) 0x280000), 80);
+    newProcess(((char*) 0x280000));
+    
+    execProcess(0);
 
     for (;;);
 }

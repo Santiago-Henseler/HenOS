@@ -9,8 +9,7 @@
 #include <pic.h>
 #include <floppyDisk/floppy.h>
 #include <syscallHandler.h>
-
-#include "../process/process.h"    
+   
 
 // Total de interrupciones por hardware
 #define HARDWARE_INT 16
@@ -18,10 +17,11 @@
 // Cantidad de interrupciones por software
 #define SOFTWARE_INT 32 
 
+// Para las syscalls
 #define EXTRA_INT 2
 
-typedef struct {
-    uint32 gs , fs, es, ds;                               // Data segment
+typedef struct InterruptRegisters{
+    uint32 gs, fs, es, ds;                                // Data segment
     uint32 edi, esi, ebp, useless, ebx, edx, ecx, eax;    // Registros comunes
     uint32 interrupt;                                     // Numero de interrupcion 
     uint32 code;                                          // Codigo de interrupcion (si lo pushea la cpu)

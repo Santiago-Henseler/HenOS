@@ -3,6 +3,8 @@
 
 // Headers extra
 #include <stdint.h>
+#include <interrupts.h>
+#include <page.h>
 #include <stdmem.h>
 
 #define MAX_PROCESS 10
@@ -18,24 +20,26 @@ typedef enum procState {
 typedef struct process{
     uint8 pid;      // El pid va a ser la posicion en la processList
     procState state;
-    uint32 ip;
-    void * sp;
+    InterruptRegisters regs;
+    pageDirectoryEntry * pageDir;
 } process;
 
 typedef struct processList{
-    process proc[MAX_PROCESS];
+    process * proc[MAX_PROCESS];
     uint8 size;
 } processList;
 
 extern processList * procs;
 extern process * actualProcess;
 
-extern void runProcess(void * ip);
-
-void execProcess(uint8 pid);
-
+// Inicia los procesos del so seteando todo
 void initProcess();
 
+// Crea un nuevo proceso
 void newProcess(uint32 ip);
+
+// Ejecuta un proceso en particular
+void execProcess(uint8 pid);
+
 
 #endif

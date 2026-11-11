@@ -1,5 +1,7 @@
 #include "process.h"
 
+extern void runProcess(InterruptRegisters * interruptRegs);
+
 process * actualProcess;
 processList * procs;
 
@@ -14,33 +16,39 @@ void newProcess(uint32 ip){
     if(procs->size >= MAX_PROCESS)
         return;
 
-    // Seteo una pagina entera de stack
-    mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) STACK_SEGMENT), PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE);
+    process * new = (process *)malloc(sizeof(process));
 
-    process new = {procs->size, READY, ip, ((char*) STACK_SEGMENT)};
-    memCopy((void *)&new, (void *)&procs->proc[procs->size], sizeof(process)); 
+    new->pid = procs->size;
+    new->state = READY;
+    
+    // Seteo todos los segmentos
+    memSet(&new->regs, 0, sizeof(new->regs));
+    new->regs.ds = 0x23;
+    new->regs.es = 0x23;
+    new->regs.ss = 0x23;
+    new->regs.fs = 0x23;
+    new->regs.gs = 0x23;
+    new->regs.cs = 0x1B;
+    new->regs.eflags = 0x202;
+
+    int e = mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) STACK_SEGMENT), PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE | PAGE_FLAG_USER);
+    if(e == -1)
+        return;
+
+    new->regs.esp = STACK_SEGMENT + PAGE_SIZE; 
+    new->regs.eip = ip; // Leer ELF y cargar el codigo a algun lado de memoria
+
+    new->pageDir = PAGE_FLAG_NO_PRESENT; // Setear pageDirectory aca
+    
+    procs->proc[procs->size] = new;
 
     procs->size++;
 }
 
 void execProcess(uint8 pid){
-    if(pid >= MAX_PROCESS || pid >= procs->size)
-        return;
-
-    if(actualProcess != NULL)
-        actualProcess->state = READY;
-
-    process p = procs->proc[pid];
-    p.state = RUNNING;   
-    memCopy((void *)&p, (void *)&procs->proc[pid], sizeof(process));
-    memCopy((void *)&p, (void *)actualProcess, sizeof(process));
-  
-    printf("ejecuto el proceso que corre en %x \n", (char*) p.ip);
-
-    // TODO: Cambiar el Stack Pointer y la Page Table
-
-    runProcess((char*) p.ip);
-    printf("finalizo");
+    process * p = procs->proc[pid];
+    printf("aca lleg");
+    runProcess(&p->regs);
 }
 
 void killProcess(int pid){
