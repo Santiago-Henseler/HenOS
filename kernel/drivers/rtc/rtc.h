@@ -3,6 +3,7 @@
 
 // Headers extra
 #include "../io.h"
+#include <stdint.h>
 
 #define CMOS_RTC_INFO_OUT 0x70
 #define CMOS_RTC_INFO_IN 0x71
@@ -14,16 +15,33 @@
 #define RTC_MINUTE 0x02
 #define RTC_SECON 0x00
 
-int rtcYear();
 
-int rtcMonth();
+typedef struct rtcDate{
+    uint16 rtcYear;
+    uint8 rtcMonth;
+    uint8 rtcDay;
+    uint8 rtcHour;
+    uint8 rtcMinute;
+    uint8 rtcSecond;
+} rtcDate;
 
-int rtcDay();
 
-int rtcHour();
+// devuelve el año actual 
+uint16 rtcYear();
 
-int rtcMinute();
+// devuelve el mes actual
+uint8 rtcMonth();
 
-int rtcSecon();
+// devuelve el dia actual
+uint8 rtcDay();
+
+// devuelve la hora actual
+uint8 rtcHour();
+
+// devuelve el minuto actual
+uint8 rtcMinute();
+
+// devuelve el segundo actual
+uint8 rtcSecond();
 
 #endif

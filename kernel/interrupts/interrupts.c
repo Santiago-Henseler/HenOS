@@ -30,6 +30,7 @@ void interruptHardware(InterruptRegisters * interruptRegs){
 void keyboardInterrupt(InterruptRegisters *interruptRegs){
     
     char key = getKeyInput();
+    
     // TODO: en vez de printear enviar al proceso que esta corriendo
     putChar(key);
 
