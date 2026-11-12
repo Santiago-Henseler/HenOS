@@ -5,7 +5,7 @@ extern uint32 stack_top;
 tss t;
 
 void initTss(){
-    t.esp = stack_top;
+    t.esp = (uint32)&stack_top;
     t.ss = 0x10;
 
     uint32 base = (uint32)&t;

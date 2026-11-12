@@ -55,6 +55,9 @@ void killProcess(int pid){
         return;
 
     // TODO: Liberar las paginas que usa el proceso y cambiar la Page Table
+    process * p = procs->proc[pid];
+    freePage(p->regs.esp);
+
     procs->size--;  
     procs->proc[pid] = procs->proc[procs->size];
 }

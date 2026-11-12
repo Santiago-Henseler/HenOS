@@ -40,7 +40,7 @@ void keyboardInterrupt(InterruptRegisters *interruptRegs){
 
 void clockInterrupt(InterruptRegisters * interruptRegs){
     // TODO: cambiar de contexto cuando haya multitask
-
+    
     // ACK de la interrupcion al PIC
     ackPic(interruptRegs->interrupt-SOFTWARE_INT);
 }
@@ -62,13 +62,7 @@ void (* hardwareHandlers[HARDWARE_INT])(InterruptRegisters * interruptRegs) = {
     &interruptHardware
 };
 
-#include "../drivers/io.h"
-#include <stdint.h>
-
 void syscallInt(InterruptRegisters * interruptRegs){
-    outB(0xE9, '0');
-    outB(0xE9, interruptRegs->eax);
-    outB(0xE9, '0');
     interruptRegs->eax = syscallHandler(interruptRegs->eax, interruptRegs->ebx, interruptRegs->ecx, interruptRegs->edx);
 }
 
@@ -83,7 +77,6 @@ void (* extraIntHandlers[EXTRA_INT])(InterruptRegisters * interruptRegs) = {
 
 
 void interrupthandler(InterruptRegisters * interruptRegs){
-
     if(interruptRegs->interrupt > (SOFTWARE_INT + HARDWARE_INT + EXTRA_INT)){
         printf("[Error]: interrupcion no soportada\n");
         for(;;);

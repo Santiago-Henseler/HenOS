@@ -119,8 +119,9 @@ void initInterrupts(){
     idtSetEntry(45, (uint32)interruptHandlerNoCode45, 0x08, IDT_FLAGS);
     idtSetEntry(46, (uint32)interruptHandlerNoCode46, 0x08, IDT_FLAGS);
     idtSetEntry(47, (uint32)interruptHandlerNoCode47, 0x08, IDT_FLAGS);
+    
     // Seteo interrupcion de syscall
-    idtSetEntry(48, (uint32)interruptHandlerNoCode48, 0x08, IDT_FLAGS);
+    idtSetEntry(48, (uint32)interruptHandlerNoCode48, 0x08, IDT_FLAGS | IDT_RING3);
     // Seteo interrupcion de kernelPanic
     idtSetEntry(49, (uint32)interruptHandlerNoCode49, 0x08, IDT_FLAGS);
 

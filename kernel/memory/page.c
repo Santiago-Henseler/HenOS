@@ -31,7 +31,7 @@ void initPageTable(uint32 freeMemSize){
     
     mapPage(MEM_VGA, MEM_VGA, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT);
 
-    mapPage(pageDirectory, pageDirectory, PAGE_FLAG_WRITE  | PAGE_FLAG_PRESENT| PAGE_FLAG_KERNEL);
+    mapPage(pageDirectory, pageDirectory, PAGE_FLAG_WRITE  | PAGE_FLAG_PRESENT | PAGE_FLAG_KERNEL);
 
     setPageDirectory(pageDirectory);
     startPagination();
@@ -46,7 +46,7 @@ pageTableEntry * newPageTableEntry(){
     pageTableEntry * pageTable = (pageTableEntry *)ALIGN(ramBlock, 4096);
 
     for(int i = 0; i < PAGE_TABLE_SIZE; i++){
-        pageTable[i] = PAGE_FLAG_NO_PRESENT | PAGE_FLAG_USER;  
+        pageTable[i] = PAGE_FLAG_NO_PRESENT | PAGE_FLAG_USER;  // TODO: deberia solo ser accesible por el kernel y cada proc tener su propia PDE
     }
 
     return pageTable;
