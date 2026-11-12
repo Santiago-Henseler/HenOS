@@ -62,7 +62,13 @@ void (* hardwareHandlers[HARDWARE_INT])(InterruptRegisters * interruptRegs) = {
     &interruptHardware
 };
 
+#include "../drivers/io.h"
+#include <stdint.h>
+
 void syscallInt(InterruptRegisters * interruptRegs){
+    outB(0xE9, '0');
+    outB(0xE9, interruptRegs->eax);
+    outB(0xE9, '0');
     interruptRegs->eax = syscallHandler(interruptRegs->eax, interruptRegs->ebx, interruptRegs->ecx, interruptRegs->edx);
 }
 
@@ -71,9 +77,10 @@ void kernelPanicInt(InterruptRegisters * interruptRegs){
     for(;;);
 }
 
-void (* extraIntHandlers[EXTRA_INT])(InterruptRegisters * interruptRegs) ={
+void (* extraIntHandlers[EXTRA_INT])(InterruptRegisters * interruptRegs) = {
     &syscallInt, &kernelPanicInt
 };
+
 
 void interrupthandler(InterruptRegisters * interruptRegs){
 

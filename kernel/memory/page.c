@@ -46,7 +46,7 @@ pageTableEntry * newPageTableEntry(){
     pageTableEntry * pageTable = (pageTableEntry *)ALIGN(ramBlock, 4096);
 
     for(int i = 0; i < PAGE_TABLE_SIZE; i++){
-        pageTable[i] = PAGE_FLAG_NO_PRESENT; 
+        pageTable[i] = PAGE_FLAG_NO_PRESENT | PAGE_FLAG_USER;  
     }
 
     return pageTable;
@@ -60,7 +60,7 @@ int mapPage(void *pa, void *va, uint32 flags){
         pageTableEntry *newP = newPageTableEntry();
         if(newP == NULL)
             return -1;
-        pageDirectory[pageDirPos] = ((uint32)newP & PDE_TO_PT_MASK) | PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE;
+        pageDirectory[pageDirPos] = ((uint32)newP & PDE_TO_PT_MASK) | PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE | PAGE_FLAG_USER; // TODO: deberia solo ser accesible por el kernel y cada proc tener su propia PDE
         if(mapPage(newP, newP, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE ) == -1)
             return -1;
     }

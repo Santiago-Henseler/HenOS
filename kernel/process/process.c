@@ -47,7 +47,6 @@ void newProcess(uint32 ip){
 
 void execProcess(uint8 pid){
     process * p = procs->proc[pid];
-    printf("aca lleg");
     runProcess(&p->regs);
 }
 

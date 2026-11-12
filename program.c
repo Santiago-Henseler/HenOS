@@ -1,9 +1,9 @@
+void putChar(char c);
+
 void _start(){
-    while (1)
-    {
-        continue;
-    }
-    
+
+    putChar('c');
+
 
     return;
 }
