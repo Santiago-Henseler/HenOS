@@ -2,30 +2,53 @@ ENTRY(kernelEntry)
 
 SECTIONS {
     . = 0x100000;
-    
+
     kernelStart = .;
 
-    .text : {  
+    .text : {
         kernelEntry.o(.text)
-        *(.text*)
+        *(EXCLUDE_FILE (libo/*.o) .text*)
     }
-    .rodata : { 
-        *(.rodata*) 
+
+    .rodata : {
+        *(EXCLUDE_FILE (libo/*.o) .rodata*)
     }
-    .data : { 
-        *(.data*) 
+
+    .data : {
+        *(EXCLUDE_FILE (libo/*.o) .data*)
     }
 
     .bss : {
+        *(EXCLUDE_FILE (libo/*.o) .bss*)
         *(COMMON)
-        *(.bss*)
     }
+
+    . = ALIGN(4096);
+    libStart = .;
+
+    .libtext : {
+        libo/*.o(.text*)
+    }
+
+    .librodata : {
+        libo/*.o(.rodata*)
+    }
+
+    .libdata : {
+        libo/*.o(.data*)
+    }
+
+    .libbss : {
+        libo/*.o(.bss*)
+    }
+
+    . = ALIGN(4096);
+    libEnd = .;
 
     . = ALIGN(16);
     stack_bottom = .;
     . += 16384;
     stack_top = .;
 
-    . = ALIGN(16);
     kernelEnd = .;
 }

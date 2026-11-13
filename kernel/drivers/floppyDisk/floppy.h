@@ -3,6 +3,7 @@
 
 // Headers extra
 #include <stdint.h>
+#include <vga/vga.h>
 #include <stdbool.h>
 #include <stdmem.h>
 #include <kernelPanic.h>

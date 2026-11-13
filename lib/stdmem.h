@@ -4,10 +4,10 @@
 // Headers extra
 #include <stdio.h>
 #include <stdbool.h>
-#include <page.h>
 #include <syscall.h>
 
 #define NULL 0
+#define PAGE_SIZE 4096
 
 // Devuelve un puntero al primer byte de un bloque de size bytes
 // Si no se pudo reservar memoria devuelve NULL 

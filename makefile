@@ -1,12 +1,13 @@
 CFLAGS = -masm=intel -m32 -ffreestanding -nostdlib -nostdinc -fno-stack-protector -fno-pic -Wall -Wextra -g
 LIBS = -Ilib -Ikernel/drivers  -Ikernel/memory -Ikernel/interrupts -Ikernel/syscall -Ikernel/fileSystem -Ikernel/gdt
-KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c lib/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c kernel/gdt/*.c
+KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c kernel/gdt/*.c
 
 all: clean bootloader asm kernel.bin bootdisk
 debug: clean bootloader asm kernel.bin bootdisk gdb
 
 clean: 
-	rm kernel.bin kernel.elf bootloader *.o &>/dev/null
+	rm kernel.bin kernel.elf bootloader *.o &> /dev/null
+	rm -rf libo
 	clear
 
 bootloader:
@@ -21,11 +22,13 @@ asm:
 	nasm -f elf32 kernel/process/process.asm -o asmProcess.o
 	nasm -f elf32 kernel/gdt/gdt.asm -o asmGdt.o
 
-	nasm -f elf32 lib/syscall.asm -o asmSyscal.o
+	mkdir -p libo
+	nasm -f elf32 lib/syscall.asm -o libo/asmSyscal.o
 
 kernel.bin:	
+	cd libo && gcc $(CFLAGS) -I../lib -c ../lib/*.c
 	gcc $(CFLAGS) $(LIBS) -c $(KERNELFILES)
-	ld -m elf_i386 -T link.ld *.o -o kernel.elf
+	ld -m elf_i386 -T link.ld *.o libo/*.o -o kernel.elf
 	objcopy -O binary kernel.elf kernel.bin
 
 bootdisk:

@@ -1,7 +1,5 @@
 #include "stdmem.h"
 
-extern uint8 kernelEnd;
-
 typedef struct allockBlock {
     void * addr;
     uint32 size;

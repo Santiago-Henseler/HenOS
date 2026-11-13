@@ -17,6 +17,7 @@ extern uint8 kernelStart;
 // Para debug outB(0xE9, '0');
 void main(uint32 memRamSize){
     clearVga();
+
     initGdt();
     initTss();
     initInterrupts();
@@ -27,15 +28,20 @@ void main(uint32 memRamSize){
     initFloppyDisk();
     initFileSystem();
     
-    //printf("[Info] Se entro en modo protegido y se activaron las interrupciones \n");
-    //printf("[Info] Se inicio la memoria en bloques, espacio disponible: %i\n", memRamSize - kernelSize);
-    //printf("[info] Se inicio la memoria paginada\n");  
-    //printf("[info] Se inicio el driver del floppy disk\n");  
-//
-    // TODO: terminar de implementar los procesos
-     
-    initProcess(); 
-    
+    initProcess();
+
+    printf("[Info] Se entro en modo protegido y se activaron las interrupciones \n");
+    printf("[Info] Se inicio la memoria en bloques, espacio disponible: %i\n", memRamSize - kernelSize);
+    printf("[info] Se inicio la memoria paginada\n");  
+    printf("[info] Se inicio el driver del floppy disk\n");  
+    printf("[info] Se inicio el sistema de procesos\n");  
+
+    extern uint8 libEnd;
+    extern uint8 libStart;
+
+    printf("%x -- %x\n", (uint32)&libStart, (uint32)&libEnd);
+
+
     uint8 buffer[FLOPPY_BLOCK_SIZE];
     int err = readFloppyDisk(52, buffer);
      

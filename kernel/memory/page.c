@@ -5,6 +5,9 @@
 extern uint8 kernelEnd;
 extern uint8 kernelStart;
 
+extern uint8 libEnd;
+extern uint8 libStart;
+
 extern void setPageDirectory(pageDirectoryEntry* pd);
 extern void startPagination();
 
@@ -23,15 +26,18 @@ void initPageTable(uint32 freeMemSize){
     for(int i = 0; i < PAGE_DIR_SIZE; i++){
         pageDirectory[i] = PAGE_FLAG_NO_PRESENT; 
     }
-
+    
     uint32 blocks = freeMemSize / PAGE_SIZE;
     for (uint32 addr = 0; addr < ALIGN(((uint32)&kernelEnd  + blocks*sizeof(memBlock)), PAGE_SIZE); addr += PAGE_SIZE) {
-        mapPage((void*)addr, (void*)addr, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT);
+        if(addr <= (uint32)&libEnd && addr >= (uint32)&libStart)
+            mapPage((void*)addr, (void*)addr, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT | PAGE_FLAG_USER);
+        else
+            mapPage((void*)addr, (void*)addr, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT); 
     }
-    
+
     mapPage(MEM_VGA, MEM_VGA, PAGE_FLAG_KERNEL | PAGE_FLAG_WRITE | PAGE_FLAG_PRESENT);
 
-    mapPage(pageDirectory, pageDirectory, PAGE_FLAG_WRITE  | PAGE_FLAG_PRESENT | PAGE_FLAG_KERNEL);
+    mapPage(pageDirectory, pageDirectory, PAGE_FLAG_WRITE  | PAGE_FLAG_PRESENT | PAGE_FLAG_KERNEL | PAGE_FLAG_USER);
 
     setPageDirectory(pageDirectory);
     startPagination();
