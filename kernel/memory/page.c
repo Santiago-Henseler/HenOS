@@ -81,14 +81,14 @@ int mapPage(void *pa, void *va, uint32 flags){
     return 0;
 }
 
-void * getPage(){
+void * getPage(uint32 flags){
 
     void * addr = ALIGN(getRamBlock(), PAGE_SIZE);
 
     if(addr == NULL)
         return NULL;
 
-    mapPage(addr, addr, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE | PAGE_FLAG_WT);
+    mapPage(addr, addr, PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE | PAGE_FLAG_WT | flags);
 
     return addr;
 }

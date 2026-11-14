@@ -13,4 +13,6 @@ extern void writeVga(char * str);
 
 extern void * page();
 
+extern void exit();
+
 #endif

@@ -75,7 +75,7 @@ typedef uint32 pageTableEntry;
 void initPageTable(uint32 freeMemSize);
 
 // Devuelve un puntero a una direccion de memoria virtual paginada
-void * getPage();
+void * getPage(uint32 flags);
 
 int mapPage(void *pa, void *va, uint32 flags); // TODO: chequear si dejarlo publico o no
 

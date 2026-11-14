@@ -10,6 +10,6 @@ runProcess:
 
     popa    ;; Seteo todos los registros comunes
 
-    add esp, 8  
+    add esp, 8
 
     iret    ;; Cargo el resto de registros

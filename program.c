@@ -1,15 +1,12 @@
-void putChar(char c);
+void printf(char * c, ...);
+void exit();
 
 void _start(){
 
-    putChar('c');
+    char * a = "TENGO AURA %i%\n";
 
-    while (1)
-    {
-       continue;
-    }
-    
+    printf(a, 100);
 
 
-    return;
+    exit();
 }

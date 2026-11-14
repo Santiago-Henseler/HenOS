@@ -30,3 +30,9 @@ page:
     mov eax, 0x3
     int 0x30
     ret
+
+global exit
+exit:
+    mov eax, 0x4
+    int 0x30
+    ret
