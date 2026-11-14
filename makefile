@@ -1,12 +1,12 @@
 CFLAGS = -masm=intel -m32 -ffreestanding -nostdlib -nostdinc -fno-stack-protector -fno-pic -Wall -Wextra -g
-LIBS = -Ilib -Ikernel/drivers  -Ikernel/memory -Ikernel/interrupts -Ikernel/syscall -Ikernel/fileSystem -Ikernel/gdt
-KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c kernel/gdt/*.c
+LIBS = -Ilib -Ikernel/drivers  -Ikernel/memory -Ikernel/interrupts  -Ikernel/sched -Ikernel/process -Ikernel/syscall -Ikernel/fileSystem -Ikernel/gdt
+KERNELFILES = kernel/*.c kernel/drivers/*/*.c kernel/drivers/*.c kernel/interrupts/*.c kernel/memory/*.c kernel/syscall/*.c kernel/fileSystem/*.c kernel/process/*.c kernel/gdt/*.c kernel/sched/*.c kernel/process/*.c
 
 all: clean bootloader asm kernel.bin bootdisk
 debug: clean bootloader asm kernel.bin bootdisk gdb
 
 clean: 
-	rm kernel.bin kernel.elf bootloader *.o &> /dev/null
+	rm *.bin kernel.elf bootloader *.o &> /dev/null
 	rm -rf libo
 	clear
 

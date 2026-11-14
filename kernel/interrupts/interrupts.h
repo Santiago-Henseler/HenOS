@@ -2,13 +2,15 @@
 #define INTERRUPTS_H
 
 // Headers extra
-#include <keyboard/keyboard.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <idt.h>
 #include <pic.h>
-#include <floppyDisk/floppy.h>
+#include <stdio.h>
+#include <sched.h>
+#include <stdint.h>
+#include <process.h>
 #include <syscallHandler.h>
+#include <floppyDisk/floppy.h>
+#include <keyboard/keyboard.h>
    
 
 // Total de interrupciones por hardware
@@ -19,14 +21,6 @@
 
 // Para las syscalls
 #define EXTRA_INT 2
-
-typedef struct InterruptRegisters{
-    uint32 gs, fs, es, ds;                                // Data segment
-    uint32 edi, esi, ebp, useless, ebx, edx, ecx, eax;    // Registros comunes
-    uint32 interrupt;                                     // Numero de interrupcion 
-    uint32 code;                                          // Codigo de interrupcion (si lo pushea la cpu)
-    uint32 eip, cs, eflags, esp, ss;                      // Pusheado por la cpu en la interrupcion
-} __attribute__((packed)) InterruptRegisters;
 
 // Encargado de manejar todas las interrupciones
 void interrupthandler(InterruptRegisters * interrupt);

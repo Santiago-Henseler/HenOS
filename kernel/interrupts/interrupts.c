@@ -16,7 +16,8 @@ void interruptSoftware(InterruptRegisters * interruptRegs){
     printf("%s \n", interruptName[interruptRegs->interrupt]);
     printf("eip => %x  esp => %x  flags => %x \n", interruptRegs->eip, interruptRegs->esp, interruptRegs->eflags);
 
-    for(;;); // TODO: Notificar y cambiar de proceso
+    killProcess();
+    sched();
 }
 
 void interruptHardware(InterruptRegisters * interruptRegs){
@@ -39,10 +40,10 @@ void keyboardInterrupt(InterruptRegisters *interruptRegs){
 }
 
 void clockInterrupt(InterruptRegisters * interruptRegs){
-    // TODO: cambiar de contexto cuando haya multitask
-    
     // ACK de la interrupcion al PIC
     ackPic(interruptRegs->interrupt-SOFTWARE_INT);
+
+    sched();
 }
 
 void floppyDiskInterrupt(InterruptRegisters * interruptRegs){
@@ -75,12 +76,13 @@ void (* extraIntHandlers[EXTRA_INT])(InterruptRegisters * interruptRegs) = {
     &syscallInt, &kernelPanicInt
 };
 
-
 void interrupthandler(InterruptRegisters * interruptRegs){
     if(interruptRegs->interrupt > (SOFTWARE_INT + HARDWARE_INT + EXTRA_INT)){
         printf("[Error]: interrupcion no soportada\n");
         for(;;);
     }
+
+    interruptProcess(*interruptRegs);
 
     if(interruptRegs->interrupt < SOFTWARE_INT){
         interruptSoftware(interruptRegs);

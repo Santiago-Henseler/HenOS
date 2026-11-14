@@ -1,12 +1,13 @@
 void printf(char * c, ...);
+void putChar(char c);
 void exit();
 
 void _start(){
 
-    char * a = "TENGO AURA %i%\n";
+    //printf("TENGO AURA %i%\n", 100);
 
-    printf(a, 100);
-
+    putChar('a');
+    putChar('\n');
 
     exit();
 }

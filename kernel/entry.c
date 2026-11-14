@@ -4,12 +4,12 @@
 #include <page.h>
 #include <block.h>
 #include <stdio.h>
+#include <sched.h>
 #include <vga/vga.h>
 #include <fileSystem.h>
 #include <floppyDisk/floppy.h>
 
-#include <syscallHandler.h>
-#include "process/process.h"
+#include <process.h>
 
 extern uint8 kernelEnd;
 extern uint8 kernelStart;
@@ -43,7 +43,7 @@ void main(uint32 memRamSize){
     memCopy(buffer, ((char*) 0x280000), 80);
     newProcess(((char*) 0x280000));
     
-    execProcess(0);
+    sched();
 
     for (;;);
 }

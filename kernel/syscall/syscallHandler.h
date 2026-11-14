@@ -1,9 +1,11 @@
 #ifndef SYSCALLHANDLER
 
 // Headers extra
+#include <page.h>
+#include <sched.h>
 #include <stdint.h>
 #include <vga/vga.h>
-#include <page.h>
+#include <process.h>
 
 #define SYS_WRITE 0x0
 #define SYS_READ  0x1

@@ -16,9 +16,8 @@ int syscallHandler(uint8 sysCallNum, uint32 p1, uint32 p2, uint32 p3){
             return getPage(PAGE_FLAG_USER);
             break;
         case SYS_EXIT:
-            // TODO: llamar al scheduler
-            printf("termino el programa");
-            for(;;);
+            killProcess();
+            sched();
             break;
         default:
             return -1;

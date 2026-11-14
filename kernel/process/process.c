@@ -2,7 +2,7 @@
 
 extern void runProcess(InterruptRegisters * interruptRegs);
 
-process * actualProcess;
+process * actualProcess = NULL;
 processList * procs;
 
 void initProcess(){
@@ -47,17 +47,27 @@ void newProcess(uint32 ip){
 
 void execProcess(uint8 pid){
     process * p = procs->proc[pid];
+
+    actualProcess = p;
+    actualProcess->state = RUNNING;
+
     runProcess(&p->regs);
 }
 
-void killProcess(int pid){
-    if(pid >= MAX_PROCESS || pid >= procs->size)
+void interruptProcess(InterruptRegisters regs){
+    actualProcess->regs = regs;
+}
+
+void killProcess(){
+    if(actualProcess == NULL)
         return;
 
     // TODO: Liberar las paginas que usa el proceso y cambiar la Page Table
-    process * p = procs->proc[pid];
+    process * p = procs->proc[actualProcess->pid];
     freePage(p->regs.esp);
 
     procs->size--;  
-    procs->proc[pid] = procs->proc[procs->size];
+    procs->proc[actualProcess->pid] = procs->proc[procs->size];
+
+    actualProcess = NULL;
 }
