@@ -12,7 +12,7 @@ void initProcess(){
 }
 
 void newProcess(uint32 ip){
-    
+
     if(procs->size >= MAX_PROCESS)
         return;
 
