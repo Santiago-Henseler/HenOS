@@ -3,7 +3,7 @@
 extern void runProcess(InterruptRegisters * interruptRegs);
 
 process * actualProcess = NULL;
-processList * procs;
+processList * procs = NULL;
 
 void initProcess(){
     actualProcess = NULL;

@@ -28,22 +28,22 @@ void main(uint32 memRamSize){
     initFloppyDisk();
     initFileSystem();
     
-    initProcess();
-
     printf("[Info] Se entro en modo protegido y se activaron las interrupciones \n");
     printf("[Info] Se inicio la memoria en bloques, espacio disponible: %i\n", memRamSize - kernelSize);
     printf("[info] Se inicio la memoria paginada\n");  
     printf("[info] Se inicio el driver del floppy disk\n");  
     printf("[info] Se inicio el sistema de procesos\n");  
 
-    uint8 buffer[FLOPPY_BLOCK_SIZE];
-    int err = readFloppyDisk(52, buffer);
-     
-    mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) 0x280000), PAGE_FLAG_PRESENT | PAGE_FLAG_USER);
-    memCopy(buffer, ((char*) 0x280000), 80);
-    newProcess(((char*) 0x280000));
-    
-    sched();
+    initProcess();
+    //sched();
 
+
+    //uint8 buffer[FLOPPY_BLOCK_SIZE];
+    //int err = readFloppyDisk(52, buffer);
+    // 
+    //mapPage(ALIGN(getRamBlock(), PAGE_SIZE), ((char*) 0x280000), PAGE_FLAG_PRESENT | PAGE_FLAG_USER);
+    //memCopy(buffer, ((char*) 0x280000), 80);
+    //newProcess(((char*) 0x280000));
+    
     for (;;);
 }

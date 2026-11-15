@@ -43,7 +43,7 @@ void clockInterrupt(InterruptRegisters * interruptRegs){
     // ACK de la interrupcion al PIC
     ackPic(interruptRegs->interrupt-SOFTWARE_INT);
 
-    sched();
+    interruptRegs->eip = (uint32)(&sched);
 }
 
 void floppyDiskInterrupt(InterruptRegisters * interruptRegs){
@@ -78,8 +78,8 @@ void (* extraIntHandlers[EXTRA_INT])(InterruptRegisters * interruptRegs) = {
 
 void interrupthandler(InterruptRegisters * interruptRegs){
     if(interruptRegs->interrupt > (SOFTWARE_INT + HARDWARE_INT + EXTRA_INT)){
-        printf("[Error]: interrupcion no soportada\n");
-        for(;;);
+        printVga("[Error]: interrupcion no soportada\n", WHITE);
+        kernelPanicInt(NULL);
     }
 
     interruptProcess(*interruptRegs);

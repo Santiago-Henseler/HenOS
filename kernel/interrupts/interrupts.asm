@@ -4,22 +4,22 @@ global idtLoad
 idtLoad:
     mov eax, [esp+4]
     lidt [eax]
-    call mapPic                     ; Mapeo las interrupciones por hardware
-    sti                             ; Activo todas las interrupciones
+    call mapPic                      ; Mapeo las interrupciones por hardware
+    sti                              ; Activo todas las interrupciones
     ret
 
 extern interrupthandler
 
 commonInterruptHandler:  
-    cli                             ; Pauso las interrupciones de hardware
-    pusha                           ; Pusheo registros de proposito general al stack
-                  
-    push ds                         ; Guardo el data segment actual
+    cli                              ; Pauso las interrupciones de hardware
+    pusha                            ; Pusheo registros de proposito general al stack
+                   
+    push ds                          ; Guardo el data segment actual
     push es
     push fs
     push gs
 
-    mov ax, 0x10                    ; kernel data segment
+    mov ax, 0x10                     ; kernel data segment
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -34,7 +34,7 @@ commonInterruptHandler:
     pop gs
     pop fs
     pop es
-    pop ds                           ; Reestablezco el segmento de datos
+    pop ds                              ; Reestablezco el segmento de datos
 
     popa
 
